@@ -5,7 +5,7 @@ import Note from './note.js'
 
 export default class Tag extends BaseModel {
    @column({ isPrimary: true })
-   declare id: bigint
+   declare id: number
 
    @column()
    declare name: string

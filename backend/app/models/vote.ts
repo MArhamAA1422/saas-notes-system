@@ -6,13 +6,13 @@ import User from './user.js'
 
 export default class Vote extends BaseModel {
    @column({ isPrimary: true })
-   declare id: bigint
+   declare id: number
 
    @column()
-   declare noteId: bigint
+   declare noteId: number
 
    @column()
-   declare userId: bigint
+   declare userId: number
 
    @column()
    declare voteType: 'up' | 'down'

@@ -8,10 +8,10 @@ import Note from './note.js'
 
 export default class Workspace extends BaseModel {
    @column({ isPrimary: true })
-   declare id: bigint
+   declare id: number
 
    @column({ columnName: 'tenant_id' })
-   declare tenantId: bigint
+   declare tenantId: number
 
    @column()
    declare name: string

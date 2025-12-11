@@ -6,7 +6,7 @@ import User from './user.js'
 
 export default class Company extends BaseModel {
    @column({ isPrimary: true })
-   declare id: bigint
+   declare id: number
 
    @column()
    declare name: string

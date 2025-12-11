@@ -6,13 +6,13 @@ import Tag from './tag.js'
 
 export default class NoteTag extends BaseModel {
    @column({ isPrimary: true })
-   declare id: bigint
+   declare id: number
 
    @column()
-   declare noteId: bigint
+   declare noteId: number
 
    @column()
-   declare tagId: bigint
+   declare tagId: number
 
    @column.dateTime({ autoCreate: true })
    declare createdAt: DateTime

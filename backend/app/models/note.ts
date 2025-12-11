@@ -10,13 +10,13 @@ import Vote from './vote.js'
 
 export default class Note extends BaseModel {
    @column({ isPrimary: true })
-   declare id: bigint
+   declare id: number
 
    @column()
-   declare workspaceId: bigint
+   declare workspaceId: number
 
    @column()
-   declare userId: bigint
+   declare userId: number
 
    @column()
    declare title: string

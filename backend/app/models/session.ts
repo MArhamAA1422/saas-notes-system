@@ -7,7 +7,7 @@ export default class Session extends BaseModel {
    declare id: string
 
    @column()
-   declare userId: bigint | null
+   declare userId: number | null
 
    @column()
    declare ipAddress: string | null
