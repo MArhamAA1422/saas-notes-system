@@ -112,8 +112,8 @@ export default class AuthController {
    /**
     * Get current authenticated user
     */
-   async me({ response, auth }: HttpContext) {
-      const user = auth.user
+   async me({ response, currentUser }: HttpContext) {
+      const user = currentUser
 
       await user?.load('company')
 
