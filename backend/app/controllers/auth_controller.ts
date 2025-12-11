@@ -49,10 +49,8 @@ export default class AuthController {
       return response.created({
          message: 'Registration successful',
          user: {
-            id: user.id,
             fullName: user.fullName,
             email: user.email,
-            companyId: user.tenantId,
          },
       })
    }
@@ -88,12 +86,6 @@ export default class AuthController {
 
       return response.ok({
          message: 'Login successful',
-         user: {
-            id: user.id,
-            fullName: user.fullName,
-            email: user.email,
-            companyId: user.tenantId,
-         },
       })
    }
 
@@ -115,19 +107,19 @@ export default class AuthController {
    async me({ response, currentUser }: HttpContext) {
       const user = currentUser
 
-      await user?.load('company')
+      // await user?.load('company')
 
       return response.ok({
          user: {
-            id: user?.id,
+            // id: user?.id,
             fullName: user?.fullName,
             email: user?.email,
-            companyId: user?.tenantId,
-            company: {
-               id: user?.company.id,
-               name: user?.company.name,
-               hostname: user?.company.hostname,
-            },
+            // companyId: user?.tenantId,
+            // company: {
+            //    id: user?.company.id,
+            //    name: user?.company.name,
+            //    hostname: user?.company.hostname,
+            // },
          },
       })
    }

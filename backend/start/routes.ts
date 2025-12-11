@@ -37,3 +37,12 @@ router
    })
    .prefix('/api')
    .use([middleware.auth(), middleware.company()])
+
+// Public notes directory (protected but company-scoped)
+router
+   .group(() => {
+      router.get('/notes', '#controllers/public_notes_controller.index')
+      router.get('/notes/:id', '#controllers/public_notes_controller.show')
+   })
+   .prefix('/api/public')
+   .use([middleware.auth(), middleware.company()])

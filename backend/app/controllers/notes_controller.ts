@@ -25,9 +25,11 @@ export default class NotesController {
       const notes = await Note.query()
          .where('workspace_id', workspace.id)
          .whereNull('deleted_at')
-         .preload('tags')
+         .preload('tags', (query) => {
+            query.select('id', 'name')
+         })
          .preload('user', (query) => {
-            query.select('id', 'full_name', 'email')
+            query.select('id', 'full_name')
          })
          .orderBy('updated_at', 'desc')
 
@@ -43,10 +45,12 @@ export default class NotesController {
          .where('id', params.id)
          .whereNull('deleted_at')
          .preload('workspace')
-         .preload('tags')
-         .preload('user', (query) => {
-            query.select('id', 'full_name', 'email')
+         .preload('tags', (query) => {
+            query.select('name')
          })
+         // .preload('user', (query) => {
+         //    query.select('id', 'full_name', 'email')
+         // })
          .firstOrFail()
 
       // Authorization check
@@ -68,7 +72,17 @@ export default class NotesController {
          })
       }
 
-      return response.ok({ note })
+      return response.ok({
+         note: {
+            workspaceId: note.workspaceId,
+            userId: note.userId,
+            title: note.title,
+            content: note.content,
+            status: note.status,
+            voteCount: note.voteCount,
+            tags: note.tags,
+         },
+      })
    }
 
    /**
@@ -106,7 +120,15 @@ export default class NotesController {
 
       return response.created({
          message: 'Note created successfully',
-         note,
+         note: {
+            id: note.id,
+            title: note.title,
+            content: note.content,
+            userId: note.userId,
+            companyId: currentUser!.tenantId,
+            workspaceId: note.workspaceId,
+         },
+         // note,
       })
    }
 
@@ -159,7 +181,10 @@ export default class NotesController {
 
       return response.ok({
          message: 'Note updated successfully',
-         note,
+         note: {
+            id: note.id,
+            title: note.title,
+         },
       })
    }
 
@@ -213,7 +238,6 @@ export default class NotesController {
 
       return response.ok({
          message: 'Note published successfully',
-         note,
       })
    }
 
@@ -240,7 +264,6 @@ export default class NotesController {
 
       return response.ok({
          message: 'Note unpublished successfully',
-         note,
       })
    }
 
