@@ -31,7 +31,7 @@ export default class AuthController {
       if (existingUser) {
          return response.conflict({
             error: 'Conflict',
-            message: 'Email already registered',
+            message: 'Email already taken',
          })
       }
 
