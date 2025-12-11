@@ -62,6 +62,10 @@ export default class Note extends BaseModel {
       pivotTable: 'note_tags',
       pivotForeignKey: 'note_id',
       pivotRelatedForeignKey: 'tag_id',
+      pivotTimestamps: {
+         createdAt: 'created_at',
+         updatedAt: false,
+      },
    })
    declare tags: ManyToMany<typeof Tag>
 }

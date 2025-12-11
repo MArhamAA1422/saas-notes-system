@@ -17,3 +17,23 @@ router
    })
    .prefix('/api/auth')
    .use(middleware.auth())
+
+// Notes routes
+router
+   .group(() => {
+      // Workspace notes
+      router.get('/workspaces/:workspaceId/notes', '#controllers/notes_controller.index')
+      router.post('/workspaces/:workspaceId/notes', '#controllers/notes_controller.store')
+
+      // Individual notes
+      router.get('/notes/:id', '#controllers/notes_controller.show')
+      router.put('/notes/:id', '#controllers/notes_controller.update')
+      router.delete('/notes/:id', '#controllers/notes_controller.destroy')
+
+      // Note actions
+      router.patch('/notes/:id/autosave', '#controllers/notes_controller.autosave')
+      router.post('/notes/:id/publish', '#controllers/notes_controller.publish')
+      router.post('/notes/:id/unpublish', '#controllers/notes_controller.unpublish')
+   })
+   .prefix('/api')
+   .use([middleware.auth(), middleware.company()])
