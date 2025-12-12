@@ -25,6 +25,9 @@ export default class Workspace extends BaseModel {
    @column.dateTime({ autoCreate: true, autoUpdate: true })
    declare updatedAt: DateTime
 
+   @column()
+   declare notesCount?: number
+
    // Workspace belongs to a company (tenant)
    @belongsTo(() => Company, {
       foreignKey: 'tenantId',

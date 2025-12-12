@@ -10,6 +10,7 @@
       "#services/*": ["./app/services/*.js"],
       "#validators/*": ["./app/validators/*.js"],
       "types": ["./types/http"],
+      "commands": ["./commands/*.js"],
     },
   }
 }

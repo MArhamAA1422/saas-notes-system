@@ -1,5 +1,12 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany, manyToMany } from '@adonisjs/lucid/orm'
+import {
+   BaseModel,
+   column,
+   belongsTo,
+   hasMany,
+   manyToMany,
+   beforeUpdate,
+} from '@adonisjs/lucid/orm'
 
 import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 
@@ -7,6 +14,8 @@ import Workspace from './workspace.js'
 import User from './user.js'
 import Tag from './tag.js'
 import Vote from './vote.js'
+
+import NoteHistory from '#models/note_history'
 
 export default class Note extends BaseModel {
    @column({ isPrimary: true })
@@ -68,4 +77,34 @@ export default class Note extends BaseModel {
       },
    })
    declare tags: ManyToMany<typeof Tag>
+
+   @hasMany(() => NoteHistory)
+   declare histories: HasMany<typeof NoteHistory>
+
+   // Hook: Create history before updating
+   @beforeUpdate()
+   static async createHistoryEntry(note: Note) {
+      // Only create history if content/title/status/visibility changed
+      const dirtyFields = note.$dirty
+
+      const trackableFields = ['title', 'content', 'status', 'visibility']
+      const hasTrackableChanges = trackableFields.some((field) => field in dirtyFields)
+
+      if (!hasTrackableChanges) {
+         return // Skip history if only autosave timestamp or vote_count changed
+      }
+
+      // Get original values from database
+      const original = note.$original
+
+      // Create history entry with PREVIOUS values
+      await NoteHistory.create({
+         noteId: note.id,
+         userId: note.userId, // User who owns the note
+         title: original.title,
+         content: original.content,
+         status: original.status,
+         visibility: original.visibility,
+      })
+   }
 }

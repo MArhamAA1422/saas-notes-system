@@ -5,7 +5,7 @@ import User from '#models/user'
 export default class AuthMiddleware {
    async handle(ctx: HttpContext, next: NextFn) {
       const userId = ctx.session.get('user_id')
-      console.log('HERE', ctx.session)
+      // console.log('HERE', ctx.session)
 
       if (!userId) {
          return ctx.response.unauthorized({

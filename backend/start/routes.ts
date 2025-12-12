@@ -60,3 +60,26 @@ router
    })
    .prefix('/api')
    .use(middleware.auth())
+
+// Workspace Routes
+router
+   .group(() => {
+      router.get('/workspaces', '#controllers/workspaces_controller.index')
+      router.get('/workspaces/:id', '#controllers/workspaces_controller.show')
+   })
+   .prefix('/api')
+   .use([middleware.auth(), middleware.company()])
+
+// Note History Routes
+
+router
+   .group(() => {
+      router.get('/notes/:id/history', '#controllers/note_histories_controller.index')
+      router.post(
+         '/notes/:id/history/:historyId/restore',
+         '#controllers/note_histories_controller.restore'
+      )
+      router.get('/notes/:id/history/stats', '#controllers/note_histories_controller.stats')
+   })
+   .prefix('/api')
+   .use([middleware.auth(), middleware.company()])

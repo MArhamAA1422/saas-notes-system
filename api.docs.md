@@ -505,7 +505,7 @@ Pagination, sorting, search by TITLE information will be provided as query param
 }
 ```
 
-## GET http://localhost:3333/api/notes/:id/vote
+## GET /api/notes/:id/vote
 
 ### Success Response
 
@@ -557,4 +557,61 @@ Body: { voteType: 'up' | 'down' }
     "error": "Bad Request",
     "message": "You have already upvoted this note"
 }
+```
+
+## DELETE /api/notes/:id/vote
+
+### Success Response
+
+```
+{
+    "message": "Vote removed successfully",
+    "voteCount": 35
+}
+```
+
+### Error Response
+
+```
+{
+    "error": "Not Found",
+    "message": "You have not voted on this note"
+}
+```
+
+## GET /api/workspaces
+
+### Success Response
+
+```
+{
+    "meta": {
+        "total": 505,
+        "perPage": 10,
+        "currentPage": 1,
+        "lastPage": 51,
+        "firstPage": 1,
+        "firstPageUrl": "/?page=1",
+        "lastPageUrl": "/?page=51",
+        "nextPageUrl": "/?page=2",
+        "previousPageUrl": null
+    },
+    "data": [
+        {
+            "id": 138,
+            "name": "Client Projects Workspace 133",
+            "createdAt": "2025-12-12T05:35:47.000+00:00",
+            "updatedAt": "2025-12-12T05:35:47.000+00:00",
+            "notesCount": 495
+        },
+    ]
+}
+```
+
+## GET /api/workspaces/:id
+
+### Success Response
+
+```
+
 ```
