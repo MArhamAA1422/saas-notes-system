@@ -1,29 +1,38 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Note from '#models/note'
+import Company from '#models/company'
 import { publicNotesValidator } from '#validators/note/public_note'
 
 export default class PublicNotesController {
    /**
-    * Get all public notes with pagination, sorting, search, and filters
+    * Get all public notes (scoped to user's company)
     * GET /api/public/notes
     */
    async index({ request, response }: HttpContext) {
+      // Get company from hostname
+      const hostname = request.hostname() || 'localhost'
+      const company = await Company.findByOrFail('hostname', hostname)
+
       // Validate query parameters
       const {
          page = 1,
          perPage = 20,
          sort = 'newest',
          search,
+         tags,
       } = await request.validateUsing(publicNotesValidator)
 
-      // Base query for public notes
+      // Base query for public notes (SCOPED TO COMPANY)
       const query = Note.query()
          .where('status', 'published')
          .where('visibility', 'public')
          .whereNull('deleted_at')
+         .whereHas('workspace', (workspaceQuery) => {
+            workspaceQuery.where('tenant_id', company.id) // TENANT ISOLATION
+         })
          .preload('workspace', (workspaceQuery) => {
             workspaceQuery.select('id', 'name', 'tenant_id').preload('company', (companyQuery) => {
-               companyQuery.select('id', 'name')
+               companyQuery.select('id', 'name', 'hostname')
             })
          })
          .preload('user', (userQuery) => {
@@ -35,6 +44,13 @@ export default class PublicNotesController {
       if (search) {
          query.where((builder) => {
             builder.whereILike('title', `%${search}%`)
+         })
+      }
+
+      // Filter by tags
+      if (tags && tags.length > 0) {
+         query.whereHas('tags', (tagsQuery) => {
+            tagsQuery.whereIn('name', tags)
          })
       }
 
@@ -59,7 +75,6 @@ export default class PublicNotesController {
       // Paginate
       const notes = await query.paginate(page, perPage)
 
-      // Transform response to include nested data
       const transformedNotes = notes.toJSON()
 
       return response.ok({
@@ -69,21 +84,26 @@ export default class PublicNotesController {
    }
 
    /**
-    * Get single public note by ID
+    * Get single public note (scoped to company)
     * GET /api/public/notes/:id
     */
-   async show({ params, response }: HttpContext) {
+   async show({ params, request, response }: HttpContext) {
+      // Get company from hostname
+      const hostname = request.hostname() || 'localhost'
+      const company = await Company.findByOrFail('hostname', hostname)
+
       const note = await Note.query()
          .where('id', params.id)
          .where('status', 'published')
          .where('visibility', 'public')
          .whereNull('deleted_at')
+         .whereHas('workspace', (workspaceQuery) => {
+            workspaceQuery.where('tenant_id', company.id) // TENANT ISOLATION
+         })
          .preload('workspace', (workspaceQuery) => {
-            workspaceQuery
-               .select('id', 'name', 'tenant_id', 'description')
-               .preload('company', (companyQuery) => {
-                  companyQuery.select('id', 'name', 'hostname')
-               })
+            workspaceQuery.select('id', 'name', 'tenant_id').preload('company', (companyQuery) => {
+               companyQuery.select('id', 'name', 'hostname')
+            })
          })
          .preload('user', (userQuery) => {
             userQuery.select('id', 'full_name')
