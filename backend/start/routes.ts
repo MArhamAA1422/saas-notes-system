@@ -46,3 +46,17 @@ router
    })
    .prefix('/api/public')
    .use([middleware.auth(), middleware.company()])
+
+// VOTING Routes
+router
+   .group(() => {
+      // Vote on a note
+      router.post('/notes/:id/vote', '#controllers/votes_controller.store')
+      router.delete('/notes/:id/vote', '#controllers/votes_controller.destroy')
+      router.get('/notes/:id/vote', '#controllers/votes_controller.show')
+
+      // Vote statistics (public can see this too)
+      router.get('/notes/:id/votes/stats', '#controllers/votes_controller.stats')
+   })
+   .prefix('/api')
+   .use(middleware.auth())

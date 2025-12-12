@@ -10,116 +10,165 @@ export default class AuthController {
     * Register a new user
     */
    async register({ request, response, session }: HttpContext) {
-      // Validate input
-      const payload = await request.validateUsing(createUserValidator)
+      try {
+         const payload = await request.validateUsing(createUserValidator)
 
-      // Get company by hostname (or create default for localhost)
-      const hostname = request.hostname() || 'localhost'
+         // Get company from hostname
+         const hostname = request.hostname() || 'localhost'
+         const company = await Company.findBy('hostname', hostname)
 
-      let company = await Company.findBy('hostname', hostname)
+         if (!company) {
+            return response.badRequest({
+               error: 'Unauthorized',
+               message: `No company found for hostname: ${hostname}`,
+            })
+         }
 
-      if (!company) {
-         // Create default company for localhost/development
-         company = await Company.create({
-            name: 'Default Company',
-            hostname: hostname,
+         // Check if email already exists for this company
+         const existingUser = await User.query()
+            .where('email', payload.email)
+            .where('tenant_id', company.id)
+            .first()
+
+         if (existingUser) {
+            return response.conflict({
+               error: 'Conflict',
+               message: 'Credentials already exist',
+            })
+         }
+
+         // Create user
+         const user = await User.create({
+            tenantId: company.id,
+            fullName: payload.fullName,
+            email: payload.email,
+            password: payload.password, // hashed by model hook
+         })
+
+         // Save user session
+         session.put('user_id', Number(user.id))
+
+         return response.created({
+            message: 'Registration successful',
+            user: {
+               id: user.id,
+               fullName: user.fullName,
+               email: user.email,
+               tenantId: user.tenantId,
+            },
+         })
+      } catch (error) {
+         console.error('Registration error:', error)
+         return response.internalServerError({
+            error: 'Server Error',
+            message: 'Something went wrong during registration',
          })
       }
-
-      // Check if email already exists
-      const existingUser = await User.findBy('email', payload.email)
-      if (existingUser) {
-         return response.conflict({
-            error: 'Conflict',
-            message: 'Email already taken',
-         })
-      }
-
-      // Create user
-      const user = await User.create({
-         tenantId: company.id,
-         fullName: payload.fullName,
-         email: payload.email,
-         password: payload.password, // Will be hashed by model hook
-      })
-
-      // Create session
-      session.put('user_id', Number(user.id))
-
-      return response.created({
-         message: 'Registration successful',
-         user: {
-            fullName: user.fullName,
-            email: user.email,
-         },
-      })
    }
 
    /**
     * Login user
     */
    async login({ request, response, session }: HttpContext) {
-      const payload = await request.validateUsing(loginValidator)
+      try {
+         const payload = await request.validateUsing(loginValidator)
 
-      // Find user
-      const user = await User.findBy('email', payload.email)
+         const hostname = request.hostname() || 'localhost'
+         // const hostname = 'ezycomp'
+         const company = await Company.findBy('hostname', hostname)
 
-      if (!user) {
-         return response.unauthorized({
-            error: 'Unauthorized',
-            message: 'Invalid credentials',
+         if (!company) {
+            return response.badRequest({
+               error: 'Unauthorized',
+               message: 'You are not authorized for this company',
+            })
+         }
+
+         // Find user for this company
+         const user = await User.query()
+            .where('email', payload.email)
+            .where('tenant_id', company.id)
+            .first()
+
+         if (!user) {
+            return response.unauthorized({
+               error: 'Unauthorized',
+               message: 'Invalid credentials',
+            })
+         }
+
+         // Verify password
+         const isPasswordValid = await hash.verify(user.password, payload.password)
+         if (!isPasswordValid) {
+            return response.unauthorized({
+               error: 'Unauthorized',
+               message: 'Invalid credentials',
+            })
+         }
+
+         // Save session
+         session.put('user_id', Number(user.id))
+
+         return response.ok({
+            message: 'Login successful',
+            user: {
+               id: user.id,
+               fullName: user.fullName,
+               email: user.email,
+               tenantId: user.tenantId,
+               company: {
+                  id: company.id,
+                  name: company.name,
+                  hostname: company.hostname,
+               },
+            },
+         })
+      } catch (error) {
+         console.error('Login error:', error)
+         return response.internalServerError({
+            error: 'Server Error',
+            message: 'Something went wrong during login',
          })
       }
-
-      // Verify password
-      const isPasswordValid = await hash.verify(user.password, payload.password)
-
-      if (!isPasswordValid) {
-         return response.unauthorized({
-            error: 'Unauthorized',
-            message: 'Invalid credentials',
-         })
-      }
-
-      // Create session
-      session.put('user_id', Number(user.id))
-
-      return response.ok({
-         message: 'Login successful',
-      })
    }
 
    /**
     * Logout user
     */
    async logout({ response, session }: HttpContext) {
-      session.forget('user_id')
-      await session.clear()
+      try {
+         session.forget('user_id')
+         await session.clear()
 
-      return response.ok({
-         message: 'Logout successful',
-      })
+         return response.ok({
+            message: 'Logout successful',
+         })
+      } catch (error) {
+         console.error('Logout error:', error)
+         return response.internalServerError({
+            error: 'Server Error',
+            message: 'Something went wrong during logout',
+         })
+      }
    }
 
    /**
     * Get current authenticated user
     */
    async me({ response, currentUser }: HttpContext) {
-      const user = currentUser
-
-      // await user?.load('company')
-
       return response.ok({
          user: {
-            // id: user?.id,
-            fullName: user?.fullName,
-            email: user?.email,
-            // companyId: user?.tenantId,
-            // company: {
-            //    id: user?.company.id,
-            //    name: user?.company.name,
-            //    hostname: user?.company.hostname,
-            // },
+            id: currentUser?.id,
+            fullName: currentUser?.fullName,
+            email: currentUser?.email,
+            tenantId: currentUser?.tenantId,
+            company: currentUser?.company
+               ? {
+                    id: currentUser.company.id,
+                    name: currentUser.company.name,
+                    hostname: currentUser.company.hostname,
+                 }
+               : null,
          },
       })
    }

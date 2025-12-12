@@ -12,28 +12,41 @@ export default class NotesController {
     * GET /api/workspaces/:workspaceId/notes
     */
    async index({ params, response, currentUser }: HttpContext) {
-      const workspaceId = params.workspaceId
+      try {
+         const workspaceId = params.workspaceId
 
-      // Verify workspace belongs to user's company
-      const workspace = await Workspace.query()
-         .where('id', workspaceId)
-         .where('tenant_id', currentUser!.tenantId)
-         .whereNull('deleted_at')
-         .firstOrFail()
+         const workspace = await Workspace.query()
+            .where('id', workspaceId)
+            .where('tenant_id', currentUser!.tenantId)
+            .whereNull('deleted_at')
+            .firstOrFail()
 
-      // Get notes with tags
-      const notes = await Note.query()
-         .where('workspace_id', workspace.id)
-         .whereNull('deleted_at')
-         .preload('tags', (query) => {
-            query.select('id', 'name')
+         const notes = await Note.query()
+            .where('workspace_id', workspace.id)
+            .whereNull('deleted_at')
+            .preload('tags', (query) => {
+               query.select('id', 'name')
+            })
+            .preload('user', (query) => {
+               query.select('id', 'full_name')
+            })
+            .orderBy('updated_at', 'desc')
+
+         return response.ok({ notes })
+      } catch (error) {
+         if (error.name === 'ModelNotFoundException') {
+            return response.notFound({
+               error: 'Not Found',
+               message: 'Workspace not found or access denied',
+            })
+         }
+
+         console.error(error)
+         return response.internalServerError({
+            error: 'Server Error',
+            message: 'Something went wrong while fetching notes',
          })
-         .preload('user', (query) => {
-            query.select('id', 'full_name')
-         })
-         .orderBy('updated_at', 'desc')
-
-      return response.ok({ notes })
+      }
    }
 
    /**
@@ -41,48 +54,57 @@ export default class NotesController {
     * GET /api/notes/:id
     */
    async show({ params, response, currentUser }: HttpContext) {
-      const note = await Note.query()
-         .where('id', params.id)
-         .whereNull('deleted_at')
-         .preload('workspace')
-         .preload('tags', (query) => {
-            query.select('name')
+      try {
+         const note = await Note.query()
+            .where('id', params.id)
+            .whereNull('deleted_at')
+            .preload('workspace')
+            .preload('tags', (query) => {
+               query.select('name')
+            })
+            .firstOrFail()
+
+         await note.load('workspace')
+
+         if (note.workspace.tenantId !== currentUser!.tenantId) {
+            return response.forbidden({
+               error: 'Forbidden',
+               message: 'Access denied',
+            })
+         }
+
+         if (note.visibility === 'private' && note.userId !== currentUser!.id) {
+            return response.forbidden({
+               error: 'Forbidden',
+               message: 'This note is private',
+            })
+         }
+
+         return response.ok({
+            note: {
+               workspaceId: note.workspaceId,
+               userId: note.userId,
+               title: note.title,
+               content: note.content,
+               status: note.status,
+               voteCount: note.voteCount,
+               tags: note.tags,
+            },
          })
-         // .preload('user', (query) => {
-         //    query.select('id', 'full_name', 'email')
-         // })
-         .firstOrFail()
+      } catch (error) {
+         if (error.name === 'ModelNotFoundException') {
+            return response.notFound({
+               error: 'Not Found',
+               message: 'Note not found',
+            })
+         }
 
-      // Authorization check
-      await note.load('workspace')
-
-      // Check if user's company owns the workspace
-      if (note.workspace.tenantId !== currentUser!.tenantId) {
-         return response.forbidden({
-            error: 'Forbidden',
-            message: 'Access denied',
+         console.error(error)
+         return response.internalServerError({
+            error: 'Server Error',
+            message: 'Something went wrong while fetching the note',
          })
       }
-
-      // If note is private, only owner can see it
-      if (note.visibility === 'private' && note.userId !== currentUser!.id) {
-         return response.forbidden({
-            error: 'Forbidden',
-            message: 'This note is private',
-         })
-      }
-
-      return response.ok({
-         note: {
-            workspaceId: note.workspaceId,
-            userId: note.userId,
-            title: note.title,
-            content: note.content,
-            status: note.status,
-            voteCount: note.voteCount,
-            tags: note.tags,
-         },
-      })
    }
 
    /**
@@ -90,46 +112,66 @@ export default class NotesController {
     * POST /api/workspaces/:workspaceId/notes
     */
    async store({ params, request, response, currentUser }: HttpContext) {
-      const workspaceId = params.workspaceId
-      const payload = await request.validateUsing(createNoteValidator)
+      try {
+         const workspaceId = params.workspaceId
+         const payload = await request.validateUsing(createNoteValidator)
 
-      // Verify workspace belongs to user's company
-      const workspace = await Workspace.query()
-         .where('id', workspaceId)
-         .where('tenant_id', currentUser!.tenantId)
-         .whereNull('deleted_at')
-         .firstOrFail()
+         // Verify workspace belongs to user's company
+         const workspace = await Workspace.query()
+            .where('id', workspaceId)
+            .where('tenant_id', currentUser!.tenantId)
+            .whereNull('deleted_at')
+            .firstOrFail()
 
-      // Create note
-      const note = await Note.create({
-         workspaceId: workspace.id,
-         userId: currentUser!.id,
-         title: payload.title,
-         content: payload.content,
-         status: payload.status || 'draft',
-         visibility: payload.visibility || 'private',
-      })
+         // Create note
+         const note = await Note.create({
+            workspaceId: workspace.id,
+            userId: currentUser!.id,
+            title: payload.title,
+            content: payload.content,
+            status: payload.status || 'draft',
+            visibility: payload.visibility || 'private',
+         })
 
-      // Handle tags
-      if (payload.tags && payload.tags.length > 0) {
-         await this.syncTags(note, payload.tags)
+         // Handle tags
+         if (payload.tags && payload.tags.length > 0) {
+            await this.syncTags(note, payload.tags)
+         }
+
+         await note.load('tags')
+         await note.load('user')
+
+         return response.created({
+            message: 'Note created successfully',
+            note: {
+               id: note.id,
+               title: note.title,
+               content: note.content,
+               userId: note.userId,
+               companyId: currentUser!.tenantId,
+               workspaceId: note.workspaceId,
+            },
+         })
+      } catch (error) {
+         if (error.name === 'ModelNotFoundException') {
+            return response.notFound({
+               error: 'Not Found',
+               message: 'Workspace not found or not accessible',
+            })
+         } else if (error.messages) {
+            // Validation errors from request.validateUsing()
+            return response.badRequest({
+               error: 'Validation Error',
+               messages: error.messages,
+            })
+         }
+
+         console.error(error)
+         return response.internalServerError({
+            error: 'Server Error',
+            message: 'Something went wrong while creating the note',
+         })
       }
-
-      await note.load('tags')
-      await note.load('user')
-
-      return response.created({
-         message: 'Note created successfully',
-         note: {
-            id: note.id,
-            title: note.title,
-            content: note.content,
-            userId: note.userId,
-            companyId: currentUser!.tenantId,
-            workspaceId: note.workspaceId,
-         },
-         // note,
-      })
    }
 
    /**
@@ -137,55 +179,75 @@ export default class NotesController {
     * PUT /api/notes/:id
     */
    async update({ params, request, response, currentUser }: HttpContext) {
-      const note = await Note.query()
-         .where('id', params.id)
-         .whereNull('deleted_at')
-         .preload('workspace')
-         .firstOrFail()
+      try {
+         const note = await Note.query()
+            .where('id', params.id)
+            .whereNull('deleted_at')
+            .preload('workspace')
+            .firstOrFail()
 
-      // Check workspace belongs to user's company
-      if (note.workspace.tenantId !== currentUser!.tenantId) {
-         return response.forbidden({
-            error: 'Forbidden',
-            message: 'Access denied',
+         // Check workspace belongs to user's company
+         if (note.workspace.tenantId !== currentUser!.tenantId) {
+            return response.forbidden({
+               error: 'Forbidden',
+               message: 'Access denied',
+            })
+         }
+
+         // Only owner can edit
+         if (note.userId !== currentUser!.id) {
+            return response.forbidden({
+               error: 'Forbidden',
+               message: 'Only the note owner can edit',
+            })
+         }
+
+         const payload = await request.validateUsing(updateNoteValidator)
+
+         // Update note
+         note.merge({
+            title: payload.title,
+            content: payload.content,
+            status: payload.status,
+            visibility: payload.visibility,
+         })
+         await note.save()
+
+         // Handle tags
+         if (payload.tags !== undefined) {
+            await this.syncTags(note, payload.tags)
+         }
+
+         await note.load('tags')
+         await note.load('user')
+
+         return response.ok({
+            message: 'Note updated successfully',
+            note: {
+               id: note.id,
+               title: note.title,
+            },
+         })
+      } catch (error) {
+         if (error.name === 'ModelNotFoundException') {
+            return response.notFound({
+               error: 'Not Found',
+               message: 'Note not found',
+            })
+         } else if (error.messages) {
+            // Validation errors
+            return response.badRequest({
+               error: 'Validation Error',
+               messages: error.messages,
+            })
+         }
+
+         console.error(error)
+         return response.internalServerError({
+            error: 'Server Error',
+            message: 'Something went wrong while updating the note',
          })
       }
-
-      // Only owner can edit
-      if (note.userId !== currentUser!.id) {
-         return response.forbidden({
-            error: 'Forbidden',
-            message: 'Only the note owner can edit',
-         })
-      }
-
-      const payload = await request.validateUsing(updateNoteValidator)
-
-      // Update note
-      note.merge({
-         title: payload.title,
-         content: payload.content,
-         status: payload.status,
-         visibility: payload.visibility,
-      })
-
-      await note.save()
-
-      // Handle tags
-      if (payload.tags !== undefined) {
-         await this.syncTags(note, payload.tags)
-      }
-
-      await note.load('tags')
-      await note.load('user')
-
-      return response.ok({
-         message: 'Note updated successfully',
-         note: {
-            id: note.id,
-            title: note.title,
-         },
-      })
    }
 
    /**
@@ -193,26 +255,43 @@ export default class NotesController {
     * PATCH /api/notes/:id/autosave
     */
    async autosave({ params, request, response, currentUser }: HttpContext) {
-      const note = await Note.query()
-         .where('id', params.id)
-         .where('user_id', currentUser!.id) // Only owner can autosave
-         .whereNull('deleted_at')
-         .firstOrFail()
+      try {
+         const note = await Note.query()
+            .where('id', params.id)
+            .where('user_id', currentUser!.id) // Only owner can autosave
+            .whereNull('deleted_at')
+            .firstOrFail()
 
-      const { title, content } = request.only(['title', 'content'])
+         const { title, content, status, visibility } = request.body()
 
-      note.merge({
-         title: title || note.title,
-         content: content || note.content,
-         lastAutosaveAt: DateTime.now(),
-      })
+         note.merge({
+            title: title || note.title,
+            content: content || note.content,
+            status: status || note.status,
+            visibility: visibility || note.visibility,
+            lastAutosaveAt: DateTime.now(),
+         })
 
-      await note.save()
+         await note.save()
 
-      return response.ok({
-         message: 'Auto-saved',
-         lastAutosaveAt: note.lastAutosaveAt,
-      })
+         return response.ok({
+            message: 'Auto-saved',
+            lastAutosaveAt: note.lastAutosaveAt,
+         })
+      } catch (error) {
+         if (error.name === 'ModelNotFoundException') {
+            return response.notFound({
+               error: 'Not Found',
+               message: 'Note not found or access denied',
+            })
+         }
+
+         console.error(error)
+         return response.internalServerError({
+            error: 'Server Error',
+            message: 'Something went wrong while auto-saving the note',
+         })
+      }
    }
 
    /**
@@ -220,25 +299,40 @@ export default class NotesController {
     * POST /api/notes/:id/publish
     */
    async publish({ params, response, currentUser }: HttpContext) {
-      const note = await Note.query()
-         .where('id', params.id)
-         .where('user_id', currentUser!.id) // Only owner can publish
-         .whereNull('deleted_at')
-         .firstOrFail()
+      try {
+         const note = await Note.query()
+            .where('id', params.id)
+            .where('user_id', currentUser!.id) // Only owner can publish
+            .whereNull('deleted_at')
+            .firstOrFail()
 
-      if (note.status === 'published') {
-         return response.badRequest({
-            error: 'Bad Request',
-            message: 'Note is already published',
+         if (note.status === 'published') {
+            return response.badRequest({
+               error: 'Bad Request',
+               message: 'Note is already published',
+            })
+         }
+
+         note.status = 'published'
+         await note.save()
+
+         return response.ok({
+            message: 'Note published successfully',
+         })
+      } catch (error) {
+         if (error.name === 'ModelNotFoundException') {
+            return response.notFound({
+               error: 'Not Found',
+               message: 'Note not found or access denied',
+            })
+         }
+
+         console.error(error)
+         return response.internalServerError({
+            error: 'Server Error',
+            message: 'Something went wrong while publishing the note',
          })
       }
-
-      note.status = 'published'
-      await note.save()
-
-      return response.ok({
-         message: 'Note published successfully',
-      })
    }
 
    /**
@@ -246,25 +340,40 @@ export default class NotesController {
     * POST /api/notes/:id/unpublish
     */
    async unpublish({ params, response, currentUser }: HttpContext) {
-      const note = await Note.query()
-         .where('id', params.id)
-         .where('user_id', currentUser!.id) // Only owner can unpublish
-         .whereNull('deleted_at')
-         .firstOrFail()
+      try {
+         const note = await Note.query()
+            .where('id', params.id)
+            .where('user_id', currentUser!.id) // Only owner can unpublish
+            .whereNull('deleted_at')
+            .firstOrFail()
 
-      if (note.status === 'draft') {
-         return response.badRequest({
-            error: 'Bad Request',
-            message: 'Note is already a draft',
+         if (note.status === 'draft') {
+            return response.badRequest({
+               error: 'Bad Request',
+               message: 'Note is already a draft',
+            })
+         }
+
+         note.status = 'draft'
+         await note.save()
+
+         return response.ok({
+            message: 'Note unpublished successfully',
+         })
+      } catch (error) {
+         if (error.name === 'ModelNotFoundException') {
+            return response.notFound({
+               error: 'Not Found',
+               message: 'Note not found or access denied',
+            })
+         }
+
+         console.error(error)
+         return response.internalServerError({
+            error: 'Server Error',
+            message: 'Something went wrong while unpublishing the note',
          })
       }
-
-      note.status = 'draft'
-      await note.save()
-
-      return response.ok({
-         message: 'Note unpublished successfully',
-      })
    }
 
    /**
@@ -272,18 +381,33 @@ export default class NotesController {
     * DELETE /api/notes/:id
     */
    async destroy({ params, response, currentUser }: HttpContext) {
-      const note = await Note.query()
-         .where('id', params.id)
-         .where('user_id', currentUser!.id) // Only owner can delete
-         .whereNull('deleted_at')
-         .firstOrFail()
+      try {
+         const note = await Note.query()
+            .where('id', params.id)
+            .where('user_id', currentUser!.id) // Only owner can delete
+            .whereNull('deleted_at')
+            .firstOrFail()
 
-      note.deletedAt = DateTime.now()
-      await note.save()
+         note.deletedAt = DateTime.now()
+         await note.save()
 
-      return response.ok({
-         message: 'Note deleted successfully',
-      })
+         return response.ok({
+            message: 'Note deleted successfully',
+         })
+      } catch (error) {
+         if (error.name === 'ModelNotFoundException') {
+            return response.notFound({
+               error: 'Not Found',
+               message: 'Note not found or access denied',
+            })
+         }
+
+         console.error(error)
+         return response.internalServerError({
+            error: 'Server Error',
+            message: 'Something went wrong while deleting the note',
+         })
+      }
    }
 
    /**

@@ -1,0 +1,10 @@
+Company Name: Localhost
+Workspaces: 505
+Notes: 250000
+User: localhost_user_id@example.com
+Some public notes: 8, 16, 21, 28...
+
+Company Name: EzyComp
+Workspaces: 500
+Notes: 250000
+User: ezycomp_user_id@example.com

@@ -14,10 +14,8 @@
 {
    "message": "Registration successful",
    "user": {
-      "id": 1,
       "fullName": "Test",
       "email": "test@go.com",
-      "companyId": 1,
    },
 }
 ```
@@ -44,12 +42,6 @@
 ```
 {
    "message": "Login successful",
-   "user": {
-      "id": 1,
-      "fullName": "Test",
-      "email": "test@go.com",
-      "companyId": 1,
-   },
 }
 ```
 
@@ -60,6 +52,17 @@
       "message": "Invalid credentials",
    }
 ```
+```
+{
+    "errors": [
+        {
+            "message": "The email field must be a valid email address",
+            "rule": "email",
+            "field": "email"
+        }
+    ]
+}
+```
 
 ## GET /api/auth/me
 
@@ -67,15 +70,8 @@
 ```
 {
    "user": {
-      "id": 1,
       "fullName": "Test",
       "email": "test@go.com",
-      "companyId": 1,
-      "company": {
-         "id": 1,
-         "name": "Localhost",
-         "hostname": "localhost",
-      },
    },
 }
 ```
@@ -110,7 +106,36 @@
 ### Success Response
 ```
 {
-   "message": "Logout successful",
+    "notes": [
+        {
+            "id": 1,
+            "workspaceId": 2,
+            "userId": 2,
+            "title": "Tag Test",
+            "content": "Tag Test Content",
+            "status": "published",
+            "visibility": "public",
+            "voteCount": 0,
+            "lastAutosaveAt": "2025-12-11T09:24:16.000+00:00",
+            "deletedAt": null,
+            "createdAt": "2025-12-11T06:42:48.000+00:00",
+            "updatedAt": "2025-12-11T09:34:44.000+00:00",
+            "tags": [
+                {
+                    "id": 12,
+                    "name": "ezy"
+                },
+                {
+                    "id": 13,
+                    "name": "app"
+                }
+            ],
+            "user": {
+                "id": 2,
+                "fullName": "Test"
+            }
+        }
+    ]
 }
 ```
 
@@ -134,26 +159,6 @@
 ```
 {
     "message": "Note created successfully",
-    "note": {
-        "workspaceId": 2,
-        "userId": 2,
-        "title": "TITLE",
-        "content": "CONTENT",
-        "status": "draft",
-        "visibility": "private",
-        "createdAt": "2025-12-11T06:42:48.385+00:00",
-        "updatedAt": "2025-12-11T06:42:48.386+00:00",
-        "id": 1,
-        "tags": [],
-        "user": {
-            "id": 2,
-            "tenantId": 1,
-            "fullName": "Test",
-            "email": "test@go.com",
-            "createdAt": "2025-12-11T05:15:34.000+00:00",
-            "updatedAt": "2025-12-11T05:15:34.000+00:00"
-        }
-    }
 }
 ```
 
@@ -215,33 +220,23 @@
 ```
 {
     "note": {
-        "id": 1,
         "workspaceId": 2,
         "userId": 2,
         "title": "TITLE",
         "content": "CONTENT",
         "status": "draft",
-        "visibility": "private",
         "voteCount": 0,
-        "lastAutosaveAt": null,
-        "deletedAt": null,
-        "createdAt": "2025-12-11T06:42:48.000+00:00",
-        "updatedAt": "2025-12-11T06:42:48.000+00:00",
-        "workspace": {
-            "id": 2,
-            "tenantId": 1,
-            "name": "Workspace B",
-            "deletedAt": null,
-            "createdAt": "2025-12-10T12:55:58.000+00:00",
-            "updatedAt": "2025-12-10T12:55:58.000+00:00"
-        },
         "tags": [],
-        "user": {
-            "id": 2,
-            "fullName": "Test",
-            "email": "test@go.com"
-        }
     }
+}
+```
+
+### Error Response
+
+```
+{
+    "error": "Forbidden",
+    "message": "This note is private"
 }
 ```
 
@@ -253,35 +248,8 @@
 {
     "message": "Note updated successfully",
     "note": {
-        "id": 2,
-        "workspaceId": 3,
-        "userId": 2,
-        "title": "New Title",
-        "content": "public content",
-        "status": "published",
-        "visibility": "public",
-        "voteCount": 0,
-        "lastAutosaveAt": null,
-        "deletedAt": null,
-        "createdAt": "2025-12-11T07:02:58.000+00:00",
-        "updatedAt": "2025-12-11T07:11:09.992+00:00",
-        "workspace": {
-            "id": 3,
-            "tenantId": 1,
-            "name": "Workspace C",
-            "deletedAt": null,
-            "createdAt": "2025-12-10T12:55:58.000+00:00",
-            "updatedAt": "2025-12-10T12:55:58.000+00:00"
-        },
-        "tags": [],
-        "user": {
-            "id": 2,
-            "tenantId": 1,
-            "fullName": "Test",
-            "email": "test@go.com",
-            "createdAt": "2025-12-11T05:15:34.000+00:00",
-            "updatedAt": "2025-12-11T05:15:34.000+00:00"
-        }
+        "id": 4,
+        "title": "note title"
     }
 }
 ```
@@ -416,20 +384,6 @@
 ```
 {
     "message": "Note published successfully",
-    "note": {
-        "id": 1,
-        "workspaceId": 2,
-        "userId": 2,
-        "title": "Test Note Titie",
-        "content": "some test content",
-        "status": "published",
-        "visibility": "private",
-        "voteCount": 0,
-        "lastAutosaveAt": "2025-12-11T09:24:16.000+00:00",
-        "deletedAt": null,
-        "createdAt": "2025-12-11T06:42:48.000+00:00",
-        "updatedAt": "2025-12-11T09:25:56.351+00:00"
-    }
 }
 ```
 
@@ -449,20 +403,6 @@
 ```
 {
     "message": "Note unpublished successfully",
-    "note": {
-        "id": 1,
-        "workspaceId": 2,
-        "userId": 2,
-        "title": "Test Note Titie",
-        "content": "some test content",
-        "status": "draft",
-        "visibility": "private",
-        "voteCount": 0,
-        "lastAutosaveAt": "2025-12-11T09:24:16.000+00:00",
-        "deletedAt": null,
-        "createdAt": "2025-12-11T06:42:48.000+00:00",
-        "updatedAt": "2025-12-11T09:26:27.911+00:00"
-    }
 }
 ```
 
@@ -472,5 +412,149 @@
 {
     "error": "Bad Request",
     "message": "Note is already a draft"
+}
+```
+
+## GET /api/public/notes
+Pagination, sorting, search by TITLE information will be provided as query params.
+
+### Success Response
+
+```
+{
+    "notes": [
+        {
+            "id": 245006,
+            "workspaceId": 77,
+            "userId": 7,
+            "title": "Sample Note 245002 - localhost",
+            "content": "This is a generated test note used for performance and scaling tests.",
+            "status": "published",
+            "visibility": "public",
+            "voteCount": 44,
+            "lastAutosaveAt": null,
+            "deletedAt": null,
+            "createdAt": "2025-12-12T05:50:57.000+00:00",
+            "updatedAt": "2025-12-12T05:50:57.000+00:00",
+            "user": {
+                "id": 7,
+                "fullName": "Ezycomp User 1"
+            },
+            "tags": [],
+            "workspace": {
+                "id": 77,
+                "name": "Design Workspace 72",
+                "tenantId": 1,
+                "company": {
+                    "id": 1,
+                    "name": "Localhost",
+                    "hostname": "localhost"
+                }
+            }
+        },
+    ],
+    "meta": {
+        "total": 62376,
+        "perPage": 20,
+        "currentPage": 1,
+        "lastPage": 3119,
+        "firstPage": 1,
+        "firstPageUrl": "/?page=1",
+        "lastPageUrl": "/?page=3119",
+        "nextPageUrl": "/?page=2",
+        "previousPageUrl": null
+    }
+}
+```
+
+## GET /api/public/notes/:id
+
+### Success Response
+
+```
+{
+    "note": {
+        "id": 8,
+        "workspaceId": 4,
+        "userId": 11,
+        "title": "Sample Note 4 - localhost",
+        "content": "This is a generated test note used for performance and scaling tests.",
+        "status": "published",
+        "visibility": "public",
+        "voteCount": 35,
+        "lastAutosaveAt": null,
+        "deletedAt": null,
+        "createdAt": "2025-12-12T05:50:10.000+00:00",
+        "updatedAt": "2025-12-12T05:50:10.000+00:00",
+        "user": {
+            "id": 11,
+            "fullName": "Ezycomp User 5"
+        },
+        "tags": [],
+        "workspace": {
+            "id": 4,
+            "name": "Workspace D",
+            "tenantId": 1,
+            "company": {
+                "id": 1,
+                "name": "Localhost",
+                "hostname": "localhost"
+            }
+        }
+    }
+}
+```
+
+## GET http://localhost:3333/api/notes/:id/vote
+
+### Success Response
+
+```
+{
+    "hasVoted": false,
+    "voteType": null,
+    "voteCount": 35
+}
+```
+
+## GET /api/notes/:id/votes/stats
+
+Get vote breakdown for a note
+
+### Success Response
+
+```
+{
+    "upvotes": 0,
+    "downvotes": 0,
+    "total": 0,
+    "score": 0
+}
+```
+
+## POST /api/notes/:id/vote
+
+Vote on a note (upvote or downvote)
+
+Body: { voteType: 'up' | 'down' }
+
+### Success Response
+
+```
+{
+    "message": "Vote changed to downvote",
+    "vote": {
+        "voteType": "down",
+        "voteCount": 34
+    }
+}
+```
+
+### Error Response
+
+```
+{
+    "error": "Bad Request",
+    "message": "You have already upvoted this note"
 }
 ```

@@ -39,6 +39,7 @@ export default class User extends BaseModel {
    // A user creates many notes
    @hasMany(() => Note)
    declare notes: HasMany<typeof Note>
+   static accessTokens: any
 
    // Hooks
    @beforeSave()
