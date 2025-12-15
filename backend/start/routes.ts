@@ -1,6 +1,11 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
 
+// DASHBOARD (PROTECTED)
+router
+   .get('/api/dashboard', '#controllers/dashboard_controller.index')
+   .use([middleware.auth(), middleware.company()])
+
 // Public routes
 router
    .group(() => {
