@@ -1,32 +1,29 @@
-interface PaginationProps {
+type TPaginationProps = {
   currentPage: number;
   lastPage: number;
   onPageChange: (page: number) => void;
-}
+};
 
 export default function Pagination({
   currentPage,
   lastPage,
   onPageChange,
-}: PaginationProps) {
+}: TPaginationProps) {
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
-    const showPages = 5; // Show 5 page numbers at a time
+    const showPages = 5;
 
     if (lastPage <= showPages) {
-      // Show all pages if total is small
       for (let i = 1; i <= lastPage; i++) {
         pages.push(i);
       }
     } else {
-      // Always show first page
       pages.push(1);
 
       if (currentPage > 3) {
         pages.push("...");
       }
 
-      // Show pages around current page
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(lastPage - 1, currentPage + 1);
 
@@ -38,7 +35,6 @@ export default function Pagination({
         pages.push("...");
       }
 
-      // Always show last page
       pages.push(lastPage);
     }
 

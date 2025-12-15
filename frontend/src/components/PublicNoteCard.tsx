@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Note, VoteStatus } from "../types";
 import api from "../api/axios";
 
 interface PublicNoteCardProps {
   note: Note;
+  workspaceName?: string;
   onVoteChange?: () => void;
 }
 
 export default function PublicNoteCard({
   note,
+  workspaceName,
   onVoteChange,
 }: PublicNoteCardProps) {
   const [voteStatus, setVoteStatus] = useState<VoteStatus>({
@@ -19,9 +21,10 @@ export default function PublicNoteCard({
   const [loading, setLoading] = useState(false);
 
   // Fetch vote status on mount
-  useState(() => {
+  useEffect(() => {
     fetchVoteStatus();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [note.id]);
 
   const fetchVoteStatus = async () => {
     try {
@@ -82,18 +85,19 @@ export default function PublicNoteCard({
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {note.title}
           </h3>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>📁 {note.workspace?.name}</span>
-            <span>•</span>
-            <span>by {note.user.fullName}</span>
-            {note.workspace?.company && (
+          <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
+            {workspaceName && (
               <>
-                <span>•</span>
-                <span className="text-blue-600">
-                  {note.workspace.company.name}
+                <span className="flex items-center gap-1">
+                  <span>📁</span>
+                  <span>{workspaceName}</span>
                 </span>
+                <span>•</span>
               </>
             )}
+            <span>by {note.user.fullName}</span>
+            <span>•</span>
+            <span className="text-gray-500">{formatDate(note.createdAt)}</span>
           </div>
         </div>
       </div>
@@ -111,42 +115,54 @@ export default function PublicNoteCard({
               key={tag.id}
               className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
             >
-              {tag.name}
+              #{tag.name}
             </span>
           ))}
         </div>
       )}
 
-      {/* Footer */}
+      {/* Footer - Status and Voting */}
       <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-        <span className="text-sm text-gray-500">
-          {formatDate(note.createdAt)}
-        </span>
+        {/* Status Badges */}
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              note.status === "published"
+                ? "bg-green-100 text-green-800"
+                : "bg-yellow-100 text-yellow-800"
+            }`}
+          >
+            {note.status}
+          </span>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            {note.visibility === "public" ? "🌐 Public" : "🔒 Private"}
+          </span>
+        </div>
 
         {/* Voting */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleVote("up")}
             disabled={loading}
-            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
               voteStatus.voteType === "up"
-                ? "bg-green-100 text-green-700"
+                ? "bg-green-500 text-white shadow-md"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            } disabled:opacity-50`}
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             👍
           </button>
-          <span className="text-sm font-semibold text-gray-900 min-w-[2rem] text-center">
+          <span className="text-base font-bold text-gray-900 min-w-[2.5rem] text-center">
             {voteStatus.voteCount}
           </span>
           <button
             onClick={() => handleVote("down")}
             disabled={loading}
-            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
               voteStatus.voteType === "down"
-                ? "bg-red-100 text-red-700"
+                ? "bg-red-500 text-white shadow-md"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            } disabled:opacity-50`}
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             👎
           </button>

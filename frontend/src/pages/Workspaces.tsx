@@ -9,19 +9,16 @@ export default function Workspaces() {
   const [workspaces, setWorkspaces] = useState<WorkspacesResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
-    fetchWorkspaces(currentPage, search);
-  }, [currentPage, search]);
+    fetchWorkspaces(currentPage);
+  }, [currentPage]);
 
-  const fetchWorkspaces = async (page: number, searchQuery: string) => {
+  const fetchWorkspaces = async (page: number) => {
     setLoading(true);
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const params: any = { page, perPage: 10 };
-      if (searchQuery) params.search = searchQuery;
 
       const { data } = await api.get<WorkspacesResponse>("/workspaces", {
         params,
@@ -32,12 +29,6 @@ export default function Workspaces() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearch(searchInput);
-    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
@@ -67,38 +58,6 @@ export default function Workspaces() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search */}
-        <form onSubmit={handleSearch} className="mb-6">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Search workspaces..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Search
-            </button>
-            {search && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearch("");
-                  setSearchInput("");
-                  setCurrentPage(1);
-                }}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-              >
-                Clear
-              </button>
-            )}
-          </div>
-        </form>
-
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -139,11 +98,7 @@ export default function Workspaces() {
           </>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-500">
-              {search
-                ? "No workspaces found matching your search"
-                : "No workspaces available"}
-            </p>
+            <p className="text-gray-500">{"No workspaces available"}</p>
           </div>
         )}
       </main>

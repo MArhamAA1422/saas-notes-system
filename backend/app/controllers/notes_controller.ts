@@ -11,9 +11,12 @@ export default class NotesController {
     * Get all notes in a workspace
     * GET /api/workspaces/:workspaceId/notes
     */
-   async index({ params, response, currentUser }: HttpContext) {
+   async index({ params, request, response, currentUser }: HttpContext) {
       try {
          const workspaceId = params.workspaceId
+
+         const page = Number(request.input('page', 1))
+         const perPage = Number(request.input('perPage', 10))
 
          const workspace = await Workspace.query()
             .where('id', workspaceId)
@@ -23,6 +26,8 @@ export default class NotesController {
 
          const notes = await Note.query()
             .where('workspace_id', workspace.id)
+            .where('visibility', 'public')
+            .where('status', 'published')
             .whereNull('deleted_at')
             .preload('tags', (query) => {
                query.select('id', 'name')
@@ -31,8 +36,21 @@ export default class NotesController {
                query.select('id', 'full_name')
             })
             .orderBy('updated_at', 'desc')
+            .paginate(page, perPage)
 
-         return response.ok({ notes })
+         return response.ok({
+            workspace: {
+               id: workspace.id,
+               name: workspace.name,
+            },
+            pagination: {
+               total: notes.total,
+               perPage: notes.perPage,
+               currentPage: notes.currentPage,
+               lastPage: notes.lastPage,
+            },
+            notes: notes.all(),
+         })
       } catch (error) {
          if (error.name === 'ModelNotFoundException') {
             return response.notFound({
@@ -73,7 +91,10 @@ export default class NotesController {
             })
          }
 
-         if (note.visibility === 'private' && note.userId !== currentUser!.id) {
+         if (
+            (note.visibility === 'private' || note.status === 'draft') &&
+            note.userId !== currentUser!.id
+         ) {
             return response.forbidden({
                error: 'Forbidden',
                message: 'This note is private',

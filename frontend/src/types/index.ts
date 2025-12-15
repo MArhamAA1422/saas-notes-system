@@ -71,6 +71,20 @@ export interface WorkspacesResponse {
   data: WorkspaceListItem[]
 }
 
+export interface WorkspaceNotesResponse {
+  workspace: {
+    id: number
+    name: string
+  }
+  pagination: {
+    total: number
+    perPage: number
+    currentPage: number
+    lastPage: number
+  }
+  notes: Note[]
+}
+
 export interface Note {
   id: number
   workspaceId: number

@@ -154,35 +154,36 @@
 ### Success Response
 ```
 {
+    "workspace": {
+        "id": 138,
+        "name": "Client Projects Workspace 133"
+    },
+    "pagination": {
+        "total": 495,
+        "perPage": 10,
+        "currentPage": 1,
+        "lastPage": 50
+    },
     "notes": [
         {
-            "id": 1,
-            "workspaceId": 2,
-            "userId": 2,
-            "title": "Tag Test",
-            "content": "Tag Test Content",
+            "id": 249612,
+            "workspaceId": 138,
+            "userId": 4,
+            "title": "Sample Note 249608 - localhost",
+            "content": "This is a generated test note used for performance and scaling tests.",
             "status": "published",
             "visibility": "public",
-            "voteCount": 0,
-            "lastAutosaveAt": "2025-12-11T09:24:16.000+00:00",
+            "voteCount": 55,
+            "lastAutosaveAt": null,
             "deletedAt": null,
-            "createdAt": "2025-12-11T06:42:48.000+00:00",
-            "updatedAt": "2025-12-11T09:34:44.000+00:00",
-            "tags": [
-                {
-                    "id": 12,
-                    "name": "ezy"
-                },
-                {
-                    "id": 13,
-                    "name": "app"
-                }
-            ],
+            "createdAt": "2025-12-12T05:50:57.000+00:00",
+            "updatedAt": "2025-12-12T05:50:57.000+00:00",
+            "tags": [],
             "user": {
-                "id": 2,
-                "fullName": "Test"
+                "id": 4,
+                "fullName": "Localhost User 3"
             }
-        }
+        },
     ]
 }
 ```
