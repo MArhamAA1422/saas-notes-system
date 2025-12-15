@@ -30,6 +30,8 @@ router
       router.get('/workspaces/:workspaceId/notes', '#controllers/notes_controller.index')
       router.post('/workspaces/:workspaceId/notes', '#controllers/notes_controller.store')
 
+      router.get('/notes/:type', '#controllers/notes_controller.getUserNotes')
+
       // Individual notes
       router.get('/notes/:id', '#controllers/notes_controller.show')
       router.put('/notes/:id', '#controllers/notes_controller.update')

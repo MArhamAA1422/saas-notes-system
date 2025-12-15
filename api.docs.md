@@ -261,6 +261,7 @@
 }
 ```
 
+## GET /api/notes/:type
 
 ## GET /api/notes/:id
 

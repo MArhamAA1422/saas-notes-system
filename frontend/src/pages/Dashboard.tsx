@@ -87,23 +87,76 @@ export default function Dashboard() {
           <StatCard
             title="My Notes"
             value={dashboard.stats.totalNotes}
-            icon="📝"
+            icon=""
           />
-          <StatCard
-            title="Drafts"
-            value={dashboard.stats.draftNotes}
-            icon="✏️"
-          />
+          <StatCard title="Drafts" value={dashboard.stats.draftNotes} icon="" />
           <StatCard
             title="Public Notes"
             value={dashboard.stats.publicNotes}
-            icon="🌐"
+            icon=""
           />
           <StatCard
             title="Workspaces"
             value={dashboard.stats.totalWorkspaces}
-            icon="📁"
+            icon=""
           />
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Quick Actions
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <button
+              onClick={() => navigate("/my-notes/drafts")}
+              className="p-4 bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div>
+                  <h3 className="font-semibold text-gray-900">
+                    My Draft Notes
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {dashboard.stats.draftNotes} drafts
+                  </p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => navigate("/my-notes/published")}
+              className="p-4 bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div>
+                  <h3 className="font-semibold text-gray-900">
+                    My Published Notes
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {dashboard.stats.publicNotes} published
+                  </p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => navigate("/workspaces")}
+              className="p-4 bg-white rounded-lg shadow border border-gray-200 hover:shadow-md transition-shadow text-left"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">📁</span>
+                <div>
+                  <h3 className="font-semibold text-gray-900">
+                    All Workspaces
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {dashboard.stats.totalWorkspaces} workspaces
+                  </p>
+                </div>
+              </div>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -113,9 +166,6 @@ export default function Dashboard() {
               <h2 className="text-xl font-semibold text-gray-900">
                 Recent Notes
               </h2>
-              <button className="text-sm text-blue-600 hover:text-blue-500">
-                View all
-              </button>
             </div>
             <div className="space-y-4">
               {dashboard.recentNotes.length > 0 ? (
@@ -129,17 +179,18 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+
           {/* Workspaces list */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">
-                Workspaces
+                Top Workspaces
               </h2>
               <button
                 onClick={() => navigate("/workspaces")}
                 className="text-sm text-blue-600 hover:text-blue-500 font-medium"
               >
-                View all
+                View all →
               </button>
             </div>
             <div className="space-y-4">

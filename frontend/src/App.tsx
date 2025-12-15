@@ -6,6 +6,8 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Workspaces from "./pages/Workspaces";
 import WorkspaceNotes from "./pages/WorkspaceNotes";
+import MyNotes from "./pages/MyNotes";
+import NoteEdit from "./pages/NoteEdit";
 
 function App() {
   return (
@@ -35,6 +37,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <WorkspaceNotes />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-notes/:type"
+            element={
+              <ProtectedRoute>
+                <MyNotes />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notes/:id/edit"
+            element={
+              <ProtectedRoute>
+                <NoteEdit />
               </ProtectedRoute>
             }
           />

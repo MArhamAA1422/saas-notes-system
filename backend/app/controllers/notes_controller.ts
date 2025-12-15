@@ -129,6 +129,68 @@ export default class NotesController {
    }
 
    /**
+    * Get user's own notes by type (draft or published)
+    * GET /api/notes/:type
+    */
+   async getUserNotes({ params, response, currentUser, request }: HttpContext) {
+      const { type } = params
+      const page = request.input('page', 1)
+      const perPage = request.input('perPage', 10)
+      const search = request.input('search', '')
+
+      // Validate type
+      if (!['draft', 'published'].includes(type)) {
+         return response.badRequest({
+            error: 'Bad Request',
+            message: 'Type must be either "draft" or "published"',
+         })
+      }
+
+      const status = type === 'draft' ? 'draft' : 'published'
+
+      // Build query
+      const query = Note.query()
+         .where('user_id', currentUser!.id)
+         .where('status', status)
+         .whereNull('deleted_at')
+         .preload('workspace', (workspaceQuery) => {
+            workspaceQuery.select('id', 'name')
+         })
+         .preload('tags')
+         .select(
+            'id',
+            'workspace_id',
+            'title',
+            'content',
+            'status',
+            'visibility',
+            'vote_count',
+            'created_at',
+            'updated_at'
+         )
+         .orderBy('updated_at', 'desc')
+
+      // Search by title
+      if (search) {
+         query.whereILike('title', `%${search}%`)
+      }
+
+      // Paginate
+      const notes = await query.paginate(page, perPage)
+
+      return response.ok({
+         notes: notes.all(),
+         pagination: {
+            total: notes.total,
+            perPage: notes.perPage,
+            currentPage: notes.currentPage,
+            lastPage: notes.lastPage,
+            firstPage: 1,
+         },
+      })
+   }
+
+   /**
     * Create new note
     * POST /api/workspaces/:workspaceId/notes
     */
