@@ -1,5 +1,4 @@
 import env from '#start/env'
-import app from '@adonisjs/core/services/app'
 import { defineConfig, stores } from '@adonisjs/session'
 
 const sessionConfig = defineConfig({
@@ -25,8 +24,8 @@ const sessionConfig = defineConfig({
    cookie: {
       path: '/',
       httpOnly: true,
-      secure: app.inProduction,
-      sameSite: 'lax',
+      secure: false, // MUST be false for localhost
+      sameSite: 'lax', // Important for cross-origin
    },
 
    /**

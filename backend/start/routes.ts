@@ -3,7 +3,7 @@ import { middleware } from './kernel.js'
 
 // DASHBOARD (PROTECTED)
 router
-   .get('/api/dashboard', '#controllers/dashboard_controller.index')
+   .get('/api/', '#controllers/dashboard_controller.index')
    .use([middleware.auth(), middleware.company()])
 
 // Public routes

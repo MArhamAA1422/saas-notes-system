@@ -64,6 +64,54 @@
 }
 ```
 
+## GET /api/dashboard
+
+### Success Response
+
+```
+{
+    "user": {
+        "id": 2,
+        "fullName": "Localhost User 1",
+        "email": "localhost_user_1@example.com",
+        "company": {
+            "id": 1,
+            "name": "Localhost"
+        }
+    },
+    "stats": {
+        "totalNotes": 50071,
+        "draftNotes": 24835,
+        "publicNotes": 12598,
+        "totalWorkspaces": 505
+    },
+    "recentNotes": [
+        {
+            "id": 495020,
+            "title": "Sample Note 245016 - ezycomp",
+            "status": "draft",
+            "visibility": "public",
+            "updatedAt": "2025-12-12T05:51:46.000+00:00",
+            "workspace": {
+                "id": 521,
+                "name": "Design Workspace 16"
+            }
+        },
+        {
+            "id": 500004,
+            "title": "Sample Note 250000 - ezycomp",
+            "status": "draft",
+            "visibility": "private",
+            "updatedAt": "2025-12-12T05:51:46.000+00:00",
+            "workspace": {
+                "id": 1005,
+                "name": "Support Center Workspace 500"
+            }
+        },
+    ]
+}
+```
+
 ## GET /api/auth/me
 
 ### Success Response
