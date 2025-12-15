@@ -57,3 +57,82 @@ export interface ApiError {
     field: string
   }>
 }
+
+export interface WorkspaceListItem {
+  id: number
+  name: string
+  createdAt: string
+  updatedAt: string
+  notesCount: number
+}
+
+export interface WorkspacesResponse {
+  meta: PaginationMeta
+  data: WorkspaceListItem[]
+}
+
+export interface Note {
+  id: number
+  workspaceId: number
+  userId: number
+  title: string
+  content: string | null
+  status: 'draft' | 'published'
+  visibility: 'private' | 'public'
+  voteCount: number
+  lastAutosaveAt: string | null
+  deletedAt: string | null
+  createdAt: string
+  updatedAt: string
+  tags: Tag[]
+  user: {
+    id: number
+    fullName: string
+  }
+  workspace?: {
+    id: number
+    name: string
+    tenantId?: number
+    company: {
+      id: number
+      name: string
+    }
+  }
+}
+
+export interface Tag {
+  id: number
+  name: string
+}
+
+export interface NotesResponse {
+  notes: Note[]
+  meta: PaginationMeta
+}
+
+export interface PaginationMeta {
+  total: number
+  perPage: number
+  currentPage: number
+  lastPage: number
+  firstPage: number
+  firstPageUrl: string
+  lastPageUrl: string
+  nextPageUrl: string | null
+  previousPageUrl: string | null
+}
+
+export interface VoteStatus {
+  hasVoted: boolean
+  voteType: 'up' | 'down' | null
+  voteCount: number
+}
+
+export interface VoteStats {
+  upvotes: number
+  downvotes: number
+  total: number
+  score: number
+}
+
+export type SortOption = 'newest' | 'oldest' | 'most_upvoted' | 'most_downvoted'

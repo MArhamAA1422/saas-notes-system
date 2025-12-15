@@ -8,13 +8,13 @@ const api = axios.create({
   },
 })
 
-// DON'T auto-redirect on 401 - let components handle it
-// Response interceptor for error handling (optional logging)
+/* DON'T auto-redirect on 401 - let components handle it
+   Response interceptor for error handling (optional logging) */
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Just pass the error through, don't redirect
-    // The AuthContext and ProtectedRoute will handle authentication
+    /* Just pass the error through, don't redirect
+       The AuthContext and ProtectedRoute will handle authentication */
     return Promise.reject(error)
   }
 )

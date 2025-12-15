@@ -14,7 +14,8 @@ export default class AuthController {
          const payload = await request.validateUsing(createUserValidator)
 
          // Get company from hostname
-         const hostname = request.hostname() || 'localhost'
+         const hostname =
+            (payload.email.includes('ezycomp') ? 'ezycomp' : request.hostname()) || 'localhost'
          const company = await Company.findBy('hostname', hostname)
 
          if (!company) {
@@ -73,8 +74,8 @@ export default class AuthController {
       try {
          const payload = await request.validateUsing(loginValidator)
 
-         const hostname = request.hostname() || 'localhost'
-         // const hostname = 'ezycomp'
+         const hostname =
+            (payload.email.includes('ezycomp') ? 'ezycomp' : request.hostname()) || 'localhost'
          const company = await Company.findBy('hostname', hostname)
 
          if (!company) {
@@ -119,7 +120,6 @@ export default class AuthController {
                company: {
                   id: company.id,
                   name: company.name,
-                  hostname: company.hostname,
                },
             },
          })
@@ -166,7 +166,6 @@ export default class AuthController {
                ? {
                     id: currentUser.company.id,
                     name: currentUser.company.name,
-                    hostname: currentUser.company.hostname,
                  }
                : null,
          },

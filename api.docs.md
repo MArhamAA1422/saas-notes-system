@@ -64,7 +64,7 @@
 }
 ```
 
-## GET /api/dashboard
+## GET /api/
 
 ### Success Response
 

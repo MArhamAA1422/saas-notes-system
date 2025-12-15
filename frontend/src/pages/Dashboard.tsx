@@ -4,12 +4,15 @@ import api from "../api/axios";
 import type { DashboardData } from "../types/index";
 import StatCard from "../components/StatCard";
 import NoteCard from "../components/NoteCard";
+import { useNavigate } from "react-router-dom";
+import WorkspaceCard from "../components/WorkspaceCard";
 
 export default function Dashboard() {
   const { logout } = useAuth();
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDashboard();
@@ -64,7 +67,7 @@ export default function Dashboard() {
                 Welcome, {dashboard.user.fullName}
               </h1>
               <p className="text-sm text-gray-600 mt-1">
-                {dashboard.user.company.name}
+                Company: {dashboard.user.company.name}
               </p>
             </div>
             <button
@@ -123,6 +126,36 @@ export default function Dashboard() {
                 <p className="text-gray-500 text-center py-8">
                   No recent notes
                 </p>
+              )}
+            </div>
+          </div>
+          {/* Workspaces list */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Workspaces
+              </h2>
+              <button
+                onClick={() => navigate("/workspaces")}
+                className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+              >
+                View all
+              </button>
+            </div>
+            <div className="space-y-4">
+              {dashboard.workspaces?.length > 0 ? (
+                dashboard.workspaces.map((workspace) => (
+                  <div
+                    key={workspace.id}
+                    onClick={() =>
+                      navigate(`/workspaces/${workspace.id}/notes`)
+                    }
+                  >
+                    <WorkspaceCard workspace={workspace} />
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-8">No workspaces</p>
               )}
             </div>
           </div>

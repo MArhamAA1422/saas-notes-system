@@ -1,10 +1,11 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import NotFound from "./pages/NotFound";
+import Workspaces from "./pages/Workspaces";
+import WorkspaceNotes from "./pages/WorkspaceNotes";
 
 function App() {
   return (
@@ -21,7 +22,23 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<NotFound />} />
+          <Route
+            path="/workspaces"
+            element={
+              <ProtectedRoute>
+                <Workspaces />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workspaces/:id/notes"
+            element={
+              <ProtectedRoute>
+                <WorkspaceNotes />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
