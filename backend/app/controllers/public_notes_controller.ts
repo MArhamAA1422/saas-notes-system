@@ -8,10 +8,13 @@ export default class PublicNotesController {
     * Get all public notes (scoped to user's company)
     * GET /api/public/notes
     */
-   async index({ request, response }: HttpContext) {
+   async index({ request, response, currentUser }: HttpContext) {
       try {
+         // const hostname =
+         //    (request.hostname()?.includes('ezycomp') ? 'ezycomp' : request.hostname()) ||
+         //    'localhost'
          const hostname =
-            (request.hostname()?.includes('ezycomp') ? 'ezycomp' : request.hostname()) ||
+            (currentUser?.email?.includes('ezycomp') ? 'ezycomp' : request.hostname()) ||
             'localhost'
          const company = await Company.findByOrFail('hostname', hostname)
 
