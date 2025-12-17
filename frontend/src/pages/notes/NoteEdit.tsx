@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "../api/axios";
-import type { Note } from "../types";
+import api from "../../api/axios";
+import type { Note } from "../../types";
 
 export default function NoteEdit() {
   const { id } = useParams<{ id: string }>();
@@ -246,11 +246,11 @@ export default function NoteEdit() {
                   ) {
                     return;
                   }
-                  navigate(-1);
+                  navigate("/my-notes/published");
                 }}
                 className="text-gray-600 hover:text-gray-900"
               >
-                ← Back
+                ← Back to My Notes
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Edit Note</h1>

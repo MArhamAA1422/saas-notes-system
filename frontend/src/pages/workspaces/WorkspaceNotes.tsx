@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../api/axios";
-import type { WorkspaceNotesResponse, SortOption } from "../types";
-import PublicNoteCard from "../components/PublicNoteCard";
-import Pagination from "../components/Pagination";
+import api from "../../api/axios";
+import type { WorkspaceNotesResponse, SortOption } from "../../types";
+import PublicNoteCard from "../../components/PublicNoteCard";
+import Pagination from "../../components/Pagination";
 
 export default function WorkspaceNotes() {
   const { id: workspaceId } = useParams<{ id: string }>();

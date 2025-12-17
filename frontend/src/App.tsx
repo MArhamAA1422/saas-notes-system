@@ -4,12 +4,12 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import Workspaces from "./pages/Workspaces";
-import WorkspaceNotes from "./pages/WorkspaceNotes";
-import MyNotes from "./pages/MyNotes";
-import NoteEdit from "./pages/NoteEdit";
-import PublicNoteDirectory from "./pages/PublicNotesDirectory";
-import NoteHistory from "./pages/NoteHistory";
+import Workspaces from "./pages/workspaces/Workspaces";
+import WorkspaceNotes from "./pages/workspaces/WorkspaceNotes";
+import MyNotes from "./pages/notes/MyNotes";
+import NoteEdit from "./pages/notes/NoteEdit";
+import PublicNoteDirectory from "./pages/notes/PublicNotesDirectory";
+import NoteHistory from "./pages/notes/NoteHistory";
 
 function App() {
   return (

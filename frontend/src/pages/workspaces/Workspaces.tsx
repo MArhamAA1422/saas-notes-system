@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
-import type { WorkspacesResponse } from "../types";
-import Pagination from "../components/Pagination";
+import api from "../../api/axios";
+import type { WorkspacesResponse } from "../../types";
+import Pagination from "../../components/Pagination";
 
 export default function Workspaces() {
   const navigate = useNavigate();

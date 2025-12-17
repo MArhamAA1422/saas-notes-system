@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "../api/axios";
-import type { Note } from "../types";
+import api from "../../api/axios";
+import type { Note } from "../../types";
 
 type NoteType = "draft" | "published";
 
