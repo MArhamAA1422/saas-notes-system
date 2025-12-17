@@ -8,7 +8,7 @@ import Workspaces from "./pages/Workspaces";
 import WorkspaceNotes from "./pages/WorkspaceNotes";
 import MyNotes from "./pages/MyNotes";
 import NoteEdit from "./pages/NoteEdit";
-import PublicNotesDirectory from "./pages/PublicNotesDirectory";
+import PublicNoteDirectory from "./pages/PublicNotesDirectory";
 
 function App() {
   return (
@@ -61,7 +61,7 @@ function App() {
             path="/public/notes"
             element={
               <ProtectedRoute>
-                <PublicNotesDirectory />
+                <PublicNoteDirectory />
               </ProtectedRoute>
             }
           />

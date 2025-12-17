@@ -43,7 +43,7 @@ export default function MyNotes() {
       if (searchQuery) params.search = searchQuery;
 
       const { data: response } = await api.get<NotesResponse>(
-        `/notes/${type}`,
+        `/notes/type/${type}`,
         { params }
       );
       setData(response);

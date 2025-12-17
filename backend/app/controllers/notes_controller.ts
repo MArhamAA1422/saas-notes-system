@@ -5,6 +5,7 @@ import Tag from '#models/tag'
 import { createNoteValidator } from '#validators/note/create_note'
 import { updateNoteValidator } from '#validators/note/update_note'
 import { DateTime } from 'luxon'
+import { publicNotesValidator } from '#validators/note/public_note'
 
 export default class NotesController {
    /**
@@ -15,8 +16,12 @@ export default class NotesController {
       try {
          const workspaceId = params.workspaceId
 
-         const page = Number(request.input('page', 1))
-         const perPage = Number(request.input('perPage', 10))
+         const {
+            page = 1,
+            perPage = 10,
+            sort = 'newest',
+            search,
+         } = await request.validateUsing(publicNotesValidator)
 
          const workspace = await Workspace.query()
             .where('id', workspaceId)
@@ -24,19 +29,42 @@ export default class NotesController {
             .whereNull('deleted_at')
             .firstOrFail()
 
-         const notes = await Note.query()
+         const query = Note.query()
             .where('workspace_id', workspace.id)
-            .where('visibility', 'public')
             .where('status', 'published')
             .whereNull('deleted_at')
-            .preload('tags', (query) => {
-               query.select('id', 'name')
+            .preload('tags', (tagsQuery) => {
+               tagsQuery.select('id', 'name')
             })
-            .preload('user', (query) => {
-               query.select('id', 'full_name')
+            .preload('user', (userQuery) => {
+               userQuery.select('id', 'full_name')
             })
-            .orderBy('updated_at', 'desc')
-            .paginate(page, perPage)
+
+         // Search by title
+         if (search) {
+            query.whereILike('title', `%${search}%`)
+         }
+
+         // Sorting
+         switch (sort) {
+            case 'newest':
+               query.orderBy('created_at', 'desc')
+               break
+            case 'oldest':
+               query.orderBy('created_at', 'asc')
+               break
+            case 'most_upvoted':
+               query.orderBy('vote_count', 'desc').orderBy('created_at', 'desc')
+               break
+            case 'most_downvoted':
+               query.orderBy('vote_count', 'asc').orderBy('created_at', 'desc')
+               break
+            default:
+               query.orderBy('created_at', 'desc')
+         }
+
+         // Paginate
+         const notes = await query.paginate(page, perPage)
 
          return response.ok({
             workspace: {
@@ -72,6 +100,7 @@ export default class NotesController {
     * GET /api/notes/:id
     */
    async show({ params, response, currentUser }: HttpContext) {
+      // console.log('here')
       try {
          const note = await Note.query()
             .where('id', params.id)
@@ -83,6 +112,8 @@ export default class NotesController {
             .firstOrFail()
 
          await note.load('workspace')
+
+         // console.log(note)
 
          if (note.workspace.tenantId !== currentUser!.tenantId) {
             return response.forbidden({
@@ -277,8 +308,8 @@ export default class NotesController {
             })
          }
 
-         // Only owner can edit
-         if (note.userId !== currentUser!.id) {
+         // Only owner can edit if private note
+         if (note.visibility === 'private' && note.userId !== currentUser!.id) {
             return response.forbidden({
                error: 'Forbidden',
                message: 'Only the note owner can edit',
@@ -410,7 +441,7 @@ export default class NotesController {
             })
          }
 
-         console.error(error)
+         // console.error(error)
          return response.internalServerError({
             error: 'Server Error',
             message: 'Something went wrong while publishing the note',

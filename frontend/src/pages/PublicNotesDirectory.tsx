@@ -21,40 +21,21 @@ export default function PublicNotesDirectory() {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [sort, setSort] = useState<SortOption>("newest");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [availableTags, setAvailableTags] = useState<
-    Array<{ id: number; name: string }>
-  >([]);
 
   useEffect(() => {
-    fetchNotes(currentPage, search, sort, selectedTags);
-  }, [currentPage, search, sort, selectedTags]);
-
-  useEffect(() => {
-    fetchTags();
-  }, []);
-
-  const fetchTags = async () => {
-    try {
-      const { data } = await api.get("/public/tags");
-      setAvailableTags(data.tags || []);
-    } catch (err) {
-      console.error("Failed to fetch tags", err);
-    }
-  };
+    fetchNotes(currentPage, search, sort);
+  }, [currentPage, search, sort]);
 
   const fetchNotes = async (
     page: number,
     searchQuery: string,
-    sortOption: SortOption,
-    tags: string[]
+    sortOption: SortOption
   ) => {
     setLoading(true);
     setError("");
     try {
       const params: any = { page, perPage: 10, sort: sortOption };
       if (searchQuery) params.search = searchQuery;
-      if (tags.length > 0) params.tags = tags;
 
       const { data: response } = await api.get<PublicNotesResponse>(
         "/public/notes",
@@ -86,20 +67,10 @@ export default function PublicNotesDirectory() {
     setCurrentPage(1);
   };
 
-  const toggleTag = (tagName: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tagName)
-        ? prev.filter((t) => t !== tagName)
-        : [...prev, tagName]
-    );
-    setCurrentPage(1);
-  };
-
   const clearFilters = () => {
     setSearch("");
     setSearchInput("");
     setSort("newest");
-    setSelectedTags([]);
     setCurrentPage(1);
   };
 
@@ -210,34 +181,10 @@ export default function PublicNotesDirectory() {
               </button>
             </div>
           </div>
-
-          {/* Tag Filter */}
-          {availableTags.length > 0 && (
-            <div>
-              <span className="text-sm font-medium text-gray-700 mb-2 block">
-                Filter by tags:
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {availableTags.slice(0, 20).map((tag) => (
-                  <button
-                    key={tag.id}
-                    onClick={() => toggleTag(tag.name)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      selectedTags.includes(tag.name)
-                        ? "bg-blue-600 text-white"
-                        : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    #{tag.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Active Filters Display */}
-        {(search || sort !== "newest" || selectedTags.length > 0) && (
+        {(search || sort !== "newest") && (
           <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 flex-wrap text-sm">
@@ -254,14 +201,6 @@ export default function PublicNotesDirectory() {
                     Sort: {sort.replace("_", " ")}
                   </span>
                 )}
-                {selectedTags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-200 text-blue-800"
-                  >
-                    #{tag}
-                  </span>
-                ))}
               </div>
               <button
                 onClick={clearFilters}
@@ -282,9 +221,7 @@ export default function PublicNotesDirectory() {
           <div className="text-center py-12">
             <p className="text-red-600 font-medium">{error}</p>
             <button
-              onClick={() =>
-                fetchNotes(currentPage, search, sort, selectedTags)
-              }
+              onClick={() => fetchNotes(currentPage, search, sort)}
               className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Try Again
@@ -298,9 +235,7 @@ export default function PublicNotesDirectory() {
                   key={note.id}
                   note={note}
                   workspaceName={note.workspace?.name}
-                  onVoteChange={() =>
-                    fetchNotes(currentPage, search, sort, selectedTags)
-                  }
+                  onVoteChange={() => fetchNotes(currentPage, search, sort)}
                 />
               ))}
             </div>
@@ -320,11 +255,11 @@ export default function PublicNotesDirectory() {
               <span className="text-3xl">📝</span>
             </div>
             <p className="text-gray-500 font-medium">
-              {search || selectedTags.length > 0
+              {search
                 ? "No notes found matching your filters"
                 : "No public notes available yet"}
             </p>
-            {(search || selectedTags.length > 0) && (
+            {search && (
               <button
                 onClick={clearFilters}
                 className="mt-4 text-blue-600 hover:text-blue-700 font-medium"

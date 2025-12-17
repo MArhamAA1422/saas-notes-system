@@ -26,16 +26,20 @@ export default class PublicNotesController {
             .where('status', 'published')
             .where('visibility', 'public')
             .whereNull('deleted_at')
+
             .whereHas('workspace', (workspaceQuery) => {
-               workspaceQuery.where('tenant_id', company.id) // TENANT ISOLATION
+               workspaceQuery.where('tenant_id', company.id).whereNull('deleted_at')
             })
+
             .preload('workspace', (workspaceQuery) => {
                workspaceQuery
                   .select('id', 'name', 'tenant_id')
+                  .whereNull('deleted_at')
                   .preload('company', (companyQuery) => {
                      companyQuery.select('id', 'name', 'hostname')
                   })
             })
+
             .preload('user', (userQuery) => {
                userQuery.select('id', 'full_name')
             })
