@@ -288,6 +288,12 @@ export default function NoteEdit() {
                 {saving ? "Saving..." : "Save"}
               </button>
               <button
+                onClick={() => navigate(`/notes/${id}/history`)}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              >
+                History
+              </button>
+              <button
                 onClick={handleDelete}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
@@ -481,18 +487,11 @@ export default function NoteEdit() {
 
         {/* Help Text */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-blue-900 mb-2">💡 Tips</h3>
+          <h3 className="text-sm font-semibold text-blue-900 mb-2">Tips</h3>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• Your work is auto-saved every 30 seconds</li>
             <li>• Click "Save" to manually save your changes</li>
-            <li>
-              • Use "Publish" to make your draft visible to others (if set to
-              Public)
-            </li>
-            <li>
-              • Private notes are only visible to you, Public notes are visible
-              to your company
-            </li>
+            <li>• Use "Publish" to make your draft visible to others</li>
           </ul>
         </div>
       </main>

@@ -660,8 +660,73 @@ Body: { voteType: 'up' | 'down' }
 
 ## GET /api/workspaces/:id
 
+## GET /api/notes/:id/history
+
 ### Success Response
 
 ```
+{
+    "histories": [
+        {
+            "id": 46,
+            "noteId": 1000010,
+            "userId": 14,
+            "title": "Test History",
+            "content": "further testing...",
+            "status": "draft",
+            "visibility": "private",
+            "createdAt": "2025-12-17T11:02:08.000+00:00",
+            "user": {
+                "id": 14,
+                "fullName": "Multi Tenant EzyComp User"
+            }
+        },
+        {
+            "id": 45,
+            "noteId": 1000010,
+            "userId": 14,
+            "title": "Test History",
+            "content": "testing...",
+            "status": "draft",
+            "visibility": "private",
+            "createdAt": "2025-12-17T11:01:25.000+00:00",
+            "user": {
+                "id": 14,
+                "fullName": "Multi Tenant EzyComp User"
+            }
+        }
+    ],
+    "current": {
+        "title": "Test History",
+        "content": "further testing...",
+        "status": "draft",
+        "visibility": "private"
+    }
+}
+```
 
+### Error Response
+
+```
+{
+    "error": "Forbidden",
+    "message": "Only the note owner can view history"
+}
+```
+
+## POST /api/notes/:id/history/:historyId/restore
+
+### Success Response
+
+```
+{
+    "message": "Note restored from history successfully",
+    "note": {
+        "id": 1000010,
+        "title": "Test History",
+        "content": "testing...",
+        "status": "draft",
+        "visibility": "private"
+    }
+}
 ```

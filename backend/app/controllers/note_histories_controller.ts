@@ -11,14 +11,12 @@ export default class NoteHistoriesController {
    async index({ params, response, currentUser }: HttpContext) {
       const noteId = params.id
 
-      // Verify note exists and user has access
       const note = await Note.query()
          .where('id', noteId)
          .whereNull('deleted_at')
          .preload('workspace')
          .firstOrFail()
 
-      // Check if user's company owns the workspace
       if (note.workspace.tenantId !== currentUser!.tenantId) {
          return response.forbidden({
             error: 'Forbidden',
@@ -26,7 +24,6 @@ export default class NoteHistoriesController {
          })
       }
 
-      // Only owner can see history
       if (note.userId !== currentUser!.id) {
          return response.forbidden({
             error: 'Forbidden',
@@ -63,14 +60,12 @@ export default class NoteHistoriesController {
    async restore({ params, response, currentUser }: HttpContext) {
       const { id: noteId, historyId } = params
 
-      // Get note
       const note = await Note.query()
          .where('id', noteId)
          .whereNull('deleted_at')
          .preload('workspace')
          .firstOrFail()
 
-      // Check access
       if (note.workspace.tenantId !== currentUser!.tenantId) {
          return response.forbidden({
             error: 'Forbidden',
@@ -78,7 +73,6 @@ export default class NoteHistoriesController {
          })
       }
 
-      // Only owner can restore
       if (note.userId !== currentUser!.id) {
          return response.forbidden({
             error: 'Forbidden',
@@ -86,7 +80,6 @@ export default class NoteHistoriesController {
          })
       }
 
-      // Get history entry
       const history = await NoteHistory.query()
          .where('id', historyId)
          .where('note_id', noteId)

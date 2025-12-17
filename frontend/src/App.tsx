@@ -9,6 +9,7 @@ import WorkspaceNotes from "./pages/WorkspaceNotes";
 import MyNotes from "./pages/MyNotes";
 import NoteEdit from "./pages/NoteEdit";
 import PublicNoteDirectory from "./pages/PublicNotesDirectory";
+import NoteHistory from "./pages/NoteHistory";
 
 function App() {
   return (
@@ -54,6 +55,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <NoteEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notes/:id/history"
+            element={
+              <ProtectedRoute>
+                <NoteHistory />
               </ProtectedRoute>
             }
           />
