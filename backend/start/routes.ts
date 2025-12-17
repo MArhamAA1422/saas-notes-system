@@ -78,7 +78,6 @@ router
    .use([middleware.auth(), middleware.company()])
 
 // Note History Routes
-
 router
    .group(() => {
       router.get('/notes/:id/history', '#controllers/note_histories_controller.index')

@@ -505,7 +505,7 @@ Pagination, sorting, search by TITLE information will be provided as query param
     ],
     "meta": {
         "total": 62376,
-        "perPage": 20,
+        "perPage": 10,
         "currentPage": 1,
         "lastPage": 3119,
         "firstPage": 1,

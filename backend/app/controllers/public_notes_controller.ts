@@ -10,12 +10,14 @@ export default class PublicNotesController {
     */
    async index({ request, response }: HttpContext) {
       try {
-         const hostname = request.hostname() || 'localhost'
+         const hostname =
+            (request.hostname()?.includes('ezycomp') ? 'ezycomp' : request.hostname()) ||
+            'localhost'
          const company = await Company.findByOrFail('hostname', hostname)
 
          const {
             page = 1,
-            perPage = 20,
+            perPage = 10,
             sort = 'newest',
             search,
          } = await request.validateUsing(publicNotesValidator)
@@ -101,8 +103,9 @@ export default class PublicNotesController {
     */
    async show({ params, request, response }: HttpContext) {
       try {
-         const hostname = request.hostname() || 'localhost'
-         // const hostname = 'ezycomp'
+         const hostname =
+            (request.hostname()?.includes('ezycomp') ? 'ezycomp' : request.hostname()) ||
+            'localhost'
          const company = await Company.findByOrFail('hostname', hostname)
 
          const note = await Note.query()
