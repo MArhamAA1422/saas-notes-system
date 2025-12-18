@@ -12,6 +12,7 @@ interface HistoryEntry {
   content: string;
   status: "draft" | "published";
   visibility: "private" | "public";
+  tags: Array<{ id: number; name: string }>;
   createdAt: string;
   user: {
     id: number;
@@ -26,6 +27,7 @@ interface HistoryResponse {
     content: string;
     status: "draft" | "published";
     visibility: "private" | "public";
+    tags: Array<{ id: number; name: string }>;
   };
 }
 
@@ -296,22 +298,28 @@ export default function NoteHistory() {
                       </div>
                     </div>
 
+                    {/* Tags */}
+                    {selectedHistory.tags &&
+                      selectedHistory.tags.length > 0 && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Tags
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedHistory.tags.map((tag) => (
+                              <span
+                                key={tag.id}
+                                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                              >
+                                #{tag.name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                     {/* Metadata */}
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Status
-                        </label>
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                            selectedHistory.status === "published"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {selectedHistory.status}
-                        </span>
-                      </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Visibility

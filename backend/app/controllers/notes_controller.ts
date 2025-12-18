@@ -318,6 +318,9 @@ export default class NotesController {
 
          const payload = await request.validateUsing(updateNoteValidator)
 
+         // Set current user before updating (for history tracking)
+         note.currentUserId = currentUser!.id
+
          // Update note
          note.merge({
             title: payload.title,
@@ -372,11 +375,21 @@ export default class NotesController {
       try {
          const note = await Note.query()
             .where('id', params.id)
-            .where('user_id', currentUser!.id) // Only owner can autosave
             .whereNull('deleted_at')
             .firstOrFail()
 
+         // Check if user can edit this note
+         if (note.visibility === 'private' && note.userId !== currentUser!.id) {
+            return response.forbidden({
+               error: 'Forbidden',
+               message: 'You cannot edit this note',
+            })
+         }
+
          const { title, content, status, visibility } = request.body()
+
+         // Set current user before updating
+         note.currentUserId = currentUser!.id
 
          note.merge({
             title: title || note.title,
@@ -420,12 +433,23 @@ export default class NotesController {
             .whereNull('deleted_at')
             .firstOrFail()
 
+         // Check if user can edit this note
+         if (note.visibility === 'private' && note.userId !== currentUser!.id) {
+            return response.forbidden({
+               error: 'Forbidden',
+               message: 'You cannot edit this note',
+            })
+         }
+
          if (note.status === 'published') {
             return response.badRequest({
                error: 'Bad Request',
                message: 'Note is already published',
             })
          }
+
+         // Set current user before updating
+         note.currentUserId = currentUser!.id
 
          note.status = 'published'
          await note.save()
@@ -461,12 +485,23 @@ export default class NotesController {
             .whereNull('deleted_at')
             .firstOrFail()
 
+         // Check if user can edit this note
+         if (note.visibility === 'private' && note.userId !== currentUser!.id) {
+            return response.forbidden({
+               error: 'Forbidden',
+               message: 'You cannot edit this note',
+            })
+         }
+
          if (note.status === 'draft') {
             return response.badRequest({
                error: 'Bad Request',
                message: 'Note is already a draft',
             })
          }
+
+         // Set current user before updating
+         note.currentUserId = currentUser!.id
 
          note.status = 'draft'
          await note.save()
@@ -501,6 +536,14 @@ export default class NotesController {
             .where('user_id', currentUser!.id) // Only owner can delete
             .whereNull('deleted_at')
             .firstOrFail()
+
+         // Check if user can edit this note
+         if (note.visibility === 'private' && note.userId !== currentUser!.id) {
+            return response.forbidden({
+               error: 'Forbidden',
+               message: 'You cannot delete this note',
+            })
+         }
 
          note.deletedAt = DateTime.now()
          await note.save()

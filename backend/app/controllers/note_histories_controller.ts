@@ -15,6 +15,7 @@ export default class NoteHistoriesController {
          .where('id', noteId)
          .whereNull('deleted_at')
          .preload('workspace')
+         .preload('tags')
          .firstOrFail()
 
       if (note.workspace.tenantId !== currentUser!.tenantId) {
@@ -24,7 +25,7 @@ export default class NoteHistoriesController {
          })
       }
 
-      if (note.userId !== currentUser!.id) {
+      if (note.visibility === 'private' && note.userId !== currentUser!.id) {
          return response.forbidden({
             error: 'Forbidden',
             message: 'Only the note owner can view history',
@@ -49,6 +50,10 @@ export default class NoteHistoriesController {
             content: note.content,
             status: note.status,
             visibility: note.visibility,
+            tags: note.tags.map((tag) => ({
+               id: tag.id,
+               name: tag.name,
+            })),
          },
       })
    }
@@ -73,10 +78,11 @@ export default class NoteHistoriesController {
          })
       }
 
-      if (note.userId !== currentUser!.id) {
+      // Only owner can restore private notes, anyone can restore public notes
+      if (note.visibility === 'private' && note.userId !== currentUser!.id) {
          return response.forbidden({
             error: 'Forbidden',
-            message: 'Only the note owner can restore history',
+            message: 'Only the note owner can restore private notes',
          })
       }
 
@@ -85,14 +91,43 @@ export default class NoteHistoriesController {
          .where('note_id', noteId)
          .firstOrFail()
 
-      // Restore note content from history
-      // Note: This will trigger beforeUpdate hook and create NEW history of CURRENT state
+      // Set current user before restoring (this will create history of current state)
+      note.currentUserId = currentUser!.id
+
+      /* Restore note content from history
+         This will trigger "beforeUpdate" hook and create NEW history of CURRENT state */
       note.title = history.title
       note.content = history.content
       note.status = history.status
       note.visibility = history.visibility
 
       await note.save()
+
+      // Restore tags from history
+      if (history.tags && Array.isArray(history.tags)) {
+         const { default: Tag } = await import('#models/tag')
+
+         // Get or create tags from history
+         const tagIds = await Promise.all(
+            history.tags.map(async (historyTag: { id: number; name: string }) => {
+               // Try to find existing tag by name
+               let tag = await Tag.findBy('name', historyTag.name)
+
+               // If tag doesn't exist, create it
+               if (!tag) {
+                  tag = await Tag.create({ name: historyTag.name })
+               }
+
+               return tag.id
+            })
+         )
+
+         // Sync tags
+         await note.related('tags').sync(tagIds)
+      }
+
+      // Reload note with tags
+      await note.load('tags')
 
       return response.ok({
          message: 'Note restored from history successfully',
@@ -102,6 +137,10 @@ export default class NoteHistoriesController {
             content: note.content,
             status: note.status,
             visibility: note.visibility,
+            tags: note.tags.map((tag) => ({
+               id: tag.id,
+               name: tag.name,
+            })),
          },
       })
    }

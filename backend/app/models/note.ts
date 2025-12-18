@@ -54,6 +54,9 @@ export default class Note extends BaseModel {
    @column.dateTime({ autoCreate: true, autoUpdate: true })
    declare updatedAt: DateTime
 
+   // A property to store current user ID (not persisted to DB)
+   public currentUserId?: number
+
    // Note belongs to Workspace
    @belongsTo(() => Workspace)
    declare workspace: BelongsTo<typeof Workspace>
@@ -97,14 +100,24 @@ export default class Note extends BaseModel {
       // Get original values from database
       const original = note.$original
 
-      // Create history entry with PREVIOUS values
+      // Load current tags before creating history
+      await note.load('tags')
+
+      // Use currentUserId if set, otherwise fall back to note owner
+      const editorUserId = note.currentUserId || note.userId
+
+      // Create history entry with PREVIOUS values and CURRENT editor
       await NoteHistory.create({
          noteId: note.id,
-         userId: note.userId, // User who owns the note
+         userId: editorUserId,
          title: original.title,
          content: original.content,
          status: original.status,
          visibility: original.visibility,
+         tags: note.tags.map((tag) => ({
+            id: tag.id,
+            name: tag.name,
+         })),
       })
    }
 }
