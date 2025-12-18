@@ -8,10 +8,10 @@ export default class extends BaseSchema {
          table.bigIncrements('id').primary()
          table.bigInteger('note_id').unsigned().notNullable()
          table.bigInteger('user_id').unsigned().notNullable() // Who made the change
-         table.string('title', 500).notNullable() // Previous title
-         table.text('content').nullable() // Previous content
-         table.enum('status', ['draft', 'published']).notNullable() // Previous status
-         table.enum('visibility', ['private', 'public']).notNullable() // Previous visibility
+         table.string('title', 500).notNullable()
+         table.text('content').nullable()
+         table.enum('status', ['draft', 'published']).notNullable()
+         table.enum('visibility', ['private', 'public']).notNullable()
 
          table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(this.now())
 

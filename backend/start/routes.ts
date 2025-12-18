@@ -85,7 +85,6 @@ router
          '/notes/:id/history/:historyId/restore',
          '#controllers/note_histories_controller.restore'
       )
-      router.get('/notes/:id/history/stats', '#controllers/note_histories_controller.stats')
    })
    .prefix('/api')
    .use([middleware.auth(), middleware.company()])

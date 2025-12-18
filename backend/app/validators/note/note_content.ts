@@ -1,6 +1,6 @@
 import vine from '@vinejs/vine'
 
-export const publicNotesValidator = vine.compile(
+export const noteContentValidator = vine.compile(
    vine.object({
       page: vine.number().min(1).optional(),
       perPage: vine.number().min(1).max(20).optional(),

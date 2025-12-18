@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Note from '#models/note'
 import Company from '#models/company'
-import { publicNotesValidator } from '#validators/note/public_note'
+import { noteContentValidator } from '#validators/note/note_content'
 
 export default class PublicNotesController {
    /**
@@ -23,7 +23,7 @@ export default class PublicNotesController {
             perPage = 10,
             sort = 'newest',
             search,
-         } = await request.validateUsing(publicNotesValidator)
+         } = await request.validateUsing(noteContentValidator)
 
          const query = Note.query()
             .where('status', 'published')

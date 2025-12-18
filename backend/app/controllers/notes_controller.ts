@@ -5,7 +5,7 @@ import Tag from '#models/tag'
 import { createNoteValidator } from '#validators/note/create_note'
 import { updateNoteValidator } from '#validators/note/update_note'
 import { DateTime } from 'luxon'
-import { publicNotesValidator } from '#validators/note/public_note'
+import { noteContentValidator } from '#validators/note/note_content'
 
 export default class NotesController {
    /**
@@ -21,7 +21,7 @@ export default class NotesController {
             perPage = 10,
             sort = 'newest',
             search,
-         } = await request.validateUsing(publicNotesValidator)
+         } = await request.validateUsing(noteContentValidator)
 
          const workspace = await Workspace.query()
             .where('id', workspaceId)
