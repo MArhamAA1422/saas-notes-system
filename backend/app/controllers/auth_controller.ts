@@ -47,6 +47,7 @@ export default class AuthController {
          })
 
          // Save user session
+         await session.regenerate()
          session.put('user_id', Number(user.id))
 
          return response.created({
@@ -108,6 +109,7 @@ export default class AuthController {
          }
 
          // Save session
+         session.regenerate()
          session.put('user_id', Number(user.id))
 
          return response.ok({

@@ -156,9 +156,6 @@ export default function Workspaces() {
                       {workspace.notesCount}{" "}
                       {workspace.notesCount === 1 ? "note" : "notes"}
                     </span>
-                    <span className="text-blue-600 hover:text-blue-700">
-                      View →
-                    </span>
                   </div>
                 </div>
               ))}
