@@ -336,6 +336,7 @@ export default function WorkspaceNotes() {
                     note={note}
                     workspaceName={data.workspace.name}
                     onVoteChange={() => fetchNotes(currentPage, search, sort)}
+                    fromWorkspace={true}
                   />
                 </div>
               ))}

@@ -146,7 +146,7 @@ export default class PublicNotesController {
             })
          }
 
-         console.error(error)
+         // console.error(error)
          return response.internalServerError({
             error: 'Server Error',
             message: 'Something went wrong while fetching the note',

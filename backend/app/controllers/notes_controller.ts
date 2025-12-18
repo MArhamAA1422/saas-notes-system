@@ -87,7 +87,7 @@ export default class NotesController {
             })
          }
 
-         console.error(error)
+         // console.error(error)
          return response.internalServerError({
             error: 'Server Error',
             message: 'Something went wrong while fetching notes',
@@ -151,7 +151,7 @@ export default class NotesController {
             })
          }
 
-         console.error(error)
+         // console.error(error)
          return response.internalServerError({
             error: 'Server Error',
             message: 'Something went wrong while fetching the note',
@@ -276,7 +276,7 @@ export default class NotesController {
             })
          }
 
-         console.error(error)
+         // console.error(error)
          return response.internalServerError({
             error: 'Server Error',
             message: 'Something went wrong while creating the note',
@@ -351,7 +351,7 @@ export default class NotesController {
             })
          }
 
-         console.error(error)
+         // console.error(error)
          return response.internalServerError({
             error: 'Server Error',
             message: 'Something went wrong while updating the note',
@@ -413,7 +413,7 @@ export default class NotesController {
             })
          }
 
-         console.error(error)
+         // console.error(error)
          return response.internalServerError({
             error: 'Server Error',
             message: 'Something went wrong while auto-saving the note',
@@ -438,14 +438,6 @@ export default class NotesController {
             return response.forbidden({
                error: 'Forbidden',
                message: 'You cannot edit this note',
-            })
-         }
-
-         // Check workspace belongs to user's company
-         if (note.workspace.tenantId !== currentUser!.tenantId) {
-            return response.forbidden({
-               error: 'Forbidden',
-               message: 'Access denied',
             })
          }
 
@@ -501,14 +493,6 @@ export default class NotesController {
             })
          }
 
-         // Check workspace belongs to user's company
-         if (note.workspace.tenantId !== currentUser!.tenantId) {
-            return response.forbidden({
-               error: 'Forbidden',
-               message: 'Access denied',
-            })
-         }
-
          if (note.status === 'draft') {
             return response.badRequest({
                error: 'Bad Request',
@@ -533,7 +517,7 @@ export default class NotesController {
             })
          }
 
-         console.error(error)
+         // console.error(error)
          return response.internalServerError({
             error: 'Server Error',
             message: 'Something went wrong while unpublishing the note',
@@ -575,7 +559,7 @@ export default class NotesController {
             })
          }
 
-         console.error(error)
+         // console.error(error)
          return response.internalServerError({
             error: 'Server Error',
             message: 'Something went wrong while deleting the note',

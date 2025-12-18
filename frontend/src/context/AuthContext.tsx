@@ -2,6 +2,11 @@ import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import api from "../api/axios";
 import type { User, AuthContextType } from "../types";
+import {
+  isNonEmpty,
+  isStrongPassword,
+  isValidEmail,
+} from "../utils/validators";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -28,6 +33,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
+    if (!isValidEmail(email)) {
+      throw new Error("Invalid email address");
+    }
+
+    if (!isStrongPassword(password)) {
+      throw new Error("Password must be at least 4 characters");
+    }
+
     await api.post("/auth/login", { email, password });
     // After login, fetch user data
     const userResponse = await api.get("/auth/me");
@@ -39,6 +52,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     password: string
   ) => {
+    if (!isNonEmpty(fullName)) {
+      throw new Error("Full name is required");
+    }
+
+    if (fullName.length < 2) {
+      throw new Error("Full name must be at least 2 characters");
+    }
+
+    if (!isValidEmail(email)) {
+      throw new Error("Invalid email address");
+    }
+
+    if (!isStrongPassword(password)) {
+      throw new Error("Password must be at least 4 characters");
+    }
+
     await api.post("/auth/register", { fullName, email, password });
     // After registration, fetch user data
     const userResponse = await api.get("/auth/me");

@@ -58,10 +58,10 @@ export default class AuthController {
             },
          })
       } catch (error) {
-         console.error('Registration error:', error)
+         // console.error('Registration error:', error)
          return response.internalServerError({
             error: 'Server Error',
-            message: 'Something went wrong during registration',
+            message: 'Something went wrong during registration.',
          })
       }
    }
@@ -118,7 +118,7 @@ export default class AuthController {
             },
          })
       } catch (error) {
-         console.error('Login error:', error)
+         // console.error('Login error:', error)
          return response.internalServerError({
             error: 'Server Error',
             message: 'Something went wrong during login',
@@ -138,7 +138,7 @@ export default class AuthController {
             message: 'Logout successful',
          })
       } catch (error) {
-         console.error('Logout error:', error)
+         // console.error('Logout error:', error)
          return response.internalServerError({
             error: 'Server Error',
             message: 'Something went wrong during logout',

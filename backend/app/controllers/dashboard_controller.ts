@@ -47,22 +47,10 @@ export default class DashboardController {
             .orderBy('updated_at', 'desc')
             .limit(5)
 
-         // recent workspaces (last 5)
-         const workspaces = await Workspace.query()
-            .where('tenant_id', user.tenantId)
-            .whereNull('deleted_at')
-            .select('id', 'name', 'updated_at')
-            .withCount('notes', (query) => {
-               query.whereNull('deleted_at')
-            })
-            .orderBy('updated_at', 'desc')
-            .limit(5)
-
          return response.ok({
             user: {
                id: user.id,
                fullName: user.fullName,
-               email: user.email,
                company: {
                   id: user.company.id,
                   name: user.company.name,
@@ -85,15 +73,9 @@ export default class DashboardController {
                   name: note.workspace.name,
                },
             })),
-            workspaces: workspaces.map((workspace) => ({
-               id: workspace.id,
-               name: workspace.name,
-               notesCount: Number(workspace.$extras.notes_count),
-               updatedAt: workspace.updatedAt,
-            })),
          })
       } catch (error) {
-         console.error(error)
+         // console.error(error)
 
          return response.internalServerError({
             error: 'Server Error',

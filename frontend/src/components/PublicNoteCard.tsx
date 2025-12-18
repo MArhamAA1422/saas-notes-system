@@ -6,12 +6,14 @@ interface PublicNoteCardProps {
   note: Note;
   workspaceName?: string;
   onVoteChange?: () => void;
+  fromWorkspace?: boolean;
 }
 
 export default function PublicNoteCard({
   note,
   workspaceName,
   onVoteChange,
+  fromWorkspace,
 }: PublicNoteCardProps) {
   const [voteStatus, setVoteStatus] = useState<VoteStatus>({
     hasVoted: false,
@@ -140,31 +142,42 @@ export default function PublicNoteCard({
 
         {/* Voting */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => handleVote("up")}
-            disabled={loading}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              voteStatus.voteType === "up"
-                ? "bg-green-500 text-white shadow-md"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            👍
-          </button>
-          <span className="text-base font-bold text-gray-900 min-w-[2.5rem] text-center">
-            {voteStatus.voteCount}
-          </span>
-          <button
-            onClick={() => handleVote("down")}
-            disabled={loading}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              voteStatus.voteType === "down"
-                ? "bg-red-500 text-white shadow-md"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            👎
-          </button>
+          {fromWorkspace ? (
+            <span className="text-base text-gray-900 min-w-[2.5rem] text-center">
+              Vote status:{" "}
+              <span className="font-bold">{voteStatus.voteCount}</span>
+            </span>
+          ) : (
+            <>
+              <button
+                onClick={() => handleVote("up")}
+                disabled={loading}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  voteStatus.voteType === "up"
+                    ? "bg-green-500 text-white shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                👍
+              </button>
+
+              <span className="text-base font-bold text-gray-900 min-w-[2.5rem] text-center">
+                {voteStatus.voteCount}
+              </span>
+
+              <button
+                onClick={() => handleVote("down")}
+                disabled={loading}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  voteStatus.voteType === "down"
+                    ? "bg-red-500 text-white shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                👎
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
