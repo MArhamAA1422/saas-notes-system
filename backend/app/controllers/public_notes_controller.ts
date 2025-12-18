@@ -30,6 +30,7 @@ export default class PublicNotesController {
             .where('visibility', 'public')
             .whereNull('deleted_at')
 
+            // tenant isolation here
             .whereHas('workspace', (workspaceQuery) => {
                workspaceQuery.where('tenant_id', company.id).whereNull('deleted_at')
             })
@@ -96,7 +97,7 @@ export default class PublicNotesController {
             })
          }
 
-         console.error(error)
+         // console.error(error)
          return response.internalServerError({
             error: 'Server Error',
             message: 'Something went wrong while fetching notes',

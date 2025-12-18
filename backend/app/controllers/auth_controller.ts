@@ -54,8 +54,6 @@ export default class AuthController {
             message: 'Registration successful',
             user: {
                id: user.id,
-               fullName: user.fullName,
-               email: user.email,
                tenantId: user.tenantId,
             },
          })
@@ -116,13 +114,7 @@ export default class AuthController {
             message: 'Login successful',
             user: {
                id: user.id,
-               fullName: user.fullName,
-               email: user.email,
                tenantId: user.tenantId,
-               company: {
-                  id: company.id,
-                  name: company.name,
-               },
             },
          })
       } catch (error) {

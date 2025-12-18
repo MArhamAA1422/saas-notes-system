@@ -259,11 +259,7 @@ export default class NotesController {
             message: 'Note created successfully',
             note: {
                id: note.id,
-               title: note.title,
-               content: note.content,
                userId: note.userId,
-               companyId: currentUser!.tenantId,
-               workspaceId: note.workspaceId,
             },
          })
       } catch (error) {
@@ -340,10 +336,6 @@ export default class NotesController {
 
          return response.ok({
             message: 'Note updated successfully',
-            note: {
-               id: note.id,
-               title: note.title,
-            },
          })
       } catch (error) {
          if (error.name === 'ModelNotFoundException') {
@@ -377,6 +369,14 @@ export default class NotesController {
             .where('id', params.id)
             .whereNull('deleted_at')
             .firstOrFail()
+
+         // Check workspace belongs to user's company
+         if (note.workspace.tenantId !== currentUser!.tenantId) {
+            return response.forbidden({
+               error: 'Forbidden',
+               message: 'Access denied',
+            })
+         }
 
          // Check if user can edit this note
          if (note.visibility === 'private' && note.userId !== currentUser!.id) {
@@ -441,6 +441,14 @@ export default class NotesController {
             })
          }
 
+         // Check workspace belongs to user's company
+         if (note.workspace.tenantId !== currentUser!.tenantId) {
+            return response.forbidden({
+               error: 'Forbidden',
+               message: 'Access denied',
+            })
+         }
+
          if (note.status === 'published') {
             return response.badRequest({
                error: 'Bad Request',
@@ -490,6 +498,14 @@ export default class NotesController {
             return response.forbidden({
                error: 'Forbidden',
                message: 'You cannot edit this note',
+            })
+         }
+
+         // Check workspace belongs to user's company
+         if (note.workspace.tenantId !== currentUser!.tenantId) {
+            return response.forbidden({
+               error: 'Forbidden',
+               message: 'Access denied',
             })
          }
 
