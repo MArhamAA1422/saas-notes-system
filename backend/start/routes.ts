@@ -62,6 +62,8 @@ router
       router.delete('/notes/:id/vote', '#controllers/votes_controller.destroy')
       router.get('/notes/:id/vote', '#controllers/votes_controller.show')
 
+      router.post('/notes/votes/bulk', '#controllers/votes_controller.bulk')
+
       // Vote statistics (public can see this too)
       router.get('/notes/:id/votes/stats', '#controllers/votes_controller.stats')
    })

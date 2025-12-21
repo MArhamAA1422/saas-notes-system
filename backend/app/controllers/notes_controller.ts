@@ -106,12 +106,13 @@ export default class NotesController {
             .where('id', params.id)
             .whereNull('deleted_at')
             .preload('workspace')
+            .preload('votes')
             .preload('tags', (query) => {
                query.select('name')
             })
             .firstOrFail()
 
-         await note.load('workspace')
+         // await note.load('workspace')
 
          // console.log(note)
 

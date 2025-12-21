@@ -730,3 +730,32 @@ Body: { voteType: 'up' | 'down' }
     }
 }
 ```
+
+## POST /api/notes/votes/bulk
+
+Body: { noteIds: [1, 2, 3, ...] }
+
+### Success Response
+
+```
+{
+    "votes": {
+        "1": {
+            "hasVoted": false,
+            "voteType": null
+        },
+        "2": {
+            "hasVoted": false,
+            "voteType": null
+        },
+        "3": {
+            "hasVoted": false,
+            "voteType": null
+        },
+        "4": {
+            "hasVoted": false,
+            "voteType": null
+        }
+    }
+}
+```

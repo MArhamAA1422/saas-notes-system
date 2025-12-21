@@ -25,7 +25,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(data.user);
     } catch (error) {
       console.log(error);
-      // User not authenticated - this is fine
       setUser(null);
     } finally {
       setLoading(false);
