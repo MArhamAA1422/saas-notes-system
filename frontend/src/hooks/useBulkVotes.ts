@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react'
 import api from '../api/axios'
-
-interface VoteStatus {
-  hasVoted: boolean
-  voteType: 'up' | 'down' | null
-}
+import type { VoteStatus } from '../types/index'
 
 type VotesMap = Record<number, VoteStatus>
 

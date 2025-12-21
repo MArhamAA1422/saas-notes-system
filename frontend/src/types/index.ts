@@ -139,7 +139,7 @@ export interface PaginationMeta {
 export interface VoteStatus {
   hasVoted: boolean
   voteType: 'up' | 'down' | null
-  voteCount?: number
+  voteCount: number
 }
 
 export interface VoteStats {

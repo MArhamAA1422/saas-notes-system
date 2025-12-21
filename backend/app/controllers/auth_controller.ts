@@ -10,9 +10,9 @@ export default class AuthController {
     * Register a new user
     */
    async register({ request, response, session }: HttpContext) {
-      try {
-         const payload = await request.validateUsing(createUserValidator)
+      const payload = await request.validateUsing(createUserValidator)
 
+      try {
          // Get company from hostname
          const hostname =
             (payload.email.includes('ezycomp') ? 'ezycomp' : request.hostname()) || 'localhost'
@@ -70,9 +70,9 @@ export default class AuthController {
     * Login user
     */
    async login({ request, response, session }: HttpContext) {
-      try {
-         const payload = await request.validateUsing(loginValidator)
+      const payload = await request.validateUsing(loginValidator)
 
+      try {
          const hostname =
             (payload.email.includes('ezycomp') ? 'ezycomp' : request.hostname()) || 'localhost'
          const company = await Company.findBy('hostname', hostname)
@@ -156,12 +156,10 @@ export default class AuthController {
             fullName: currentUser?.fullName,
             email: currentUser?.email,
             tenantId: currentUser?.tenantId,
-            company: currentUser?.company
-               ? {
-                    id: currentUser.company.id,
-                    name: currentUser.company.name,
-                 }
-               : null,
+            company: {
+               id: currentUser!.company.id,
+               name: currentUser!.company.name,
+            },
          },
       })
    }
