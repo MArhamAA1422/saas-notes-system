@@ -85,6 +85,19 @@ export interface WorkspaceNotesResponse {
   notes: Note[]
 }
 
+export interface PublicNotesResponse {
+   notes: Note[];
+   meta: PaginationMeta;
+   votes: Record<
+      number,
+      {
+         hasVoted: boolean;
+         voteType: "up" | "down" | null;
+         voteCount: number;
+      }
+   >;
+}
+
 export interface Note {
   id: number
   workspaceId: number

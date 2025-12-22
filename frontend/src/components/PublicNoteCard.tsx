@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Note, VoteStatus } from "../types";
 import api from "../api/axios";
+import { formatDate } from "../utils/index";
 
 interface PublicNoteCardProps {
    note: Note;
@@ -63,14 +64,6 @@ export default function PublicNoteCard({
       } finally {
          setLoading(false);
       }
-   };
-
-   const formatDate = (dateString: string) => {
-      return new Date(dateString).toLocaleDateString("en-US", {
-         year: "numeric",
-         month: "short",
-         day: "numeric",
-      });
    };
 
    return (

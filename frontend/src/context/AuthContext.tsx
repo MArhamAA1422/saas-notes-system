@@ -41,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       await api.post("/auth/login", { email, password });
+
       // After login, fetch user data
       const userResponse = await api.get("/auth/me");
       setUser(userResponse.data.user);
@@ -68,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       await api.post("/auth/register", { fullName, email, password });
+
       // After registration, fetch user data
       const userResponse = await api.get("/auth/me");
       setUser(userResponse.data.user);
@@ -77,7 +79,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
          await api.post("/auth/logout");
       } catch (error) {
-         // Ignore logout errors
          console.log(error);
       } finally {
          setUser(null);

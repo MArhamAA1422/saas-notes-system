@@ -19,7 +19,6 @@ export default class NotesController {
          const {
             page = 1,
             perPage = 10,
-            sort = 'newest',
             search,
          } = await request.validateUsing(noteContentValidator)
 
@@ -43,24 +42,6 @@ export default class NotesController {
          // Search by title
          if (search) {
             query.whereILike('title', `%${search}%`)
-         }
-
-         // Sorting
-         switch (sort) {
-            case 'newest':
-               query.orderBy('created_at', 'desc')
-               break
-            case 'oldest':
-               query.orderBy('created_at', 'asc')
-               break
-            case 'most_upvoted':
-               query.orderBy('vote_count', 'desc').orderBy('created_at', 'desc')
-               break
-            case 'most_downvoted':
-               query.orderBy('vote_count', 'asc').orderBy('created_at', 'desc')
-               break
-            default:
-               query.orderBy('created_at', 'desc')
          }
 
          // Paginate
