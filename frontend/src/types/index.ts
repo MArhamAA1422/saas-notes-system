@@ -142,6 +142,8 @@ export interface VoteStatus {
   voteCount: number
 }
 
+export type VoteMap = Record<number, VoteStatus>
+
 export interface VoteStats {
   upvotes: number
   downvotes: number

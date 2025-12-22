@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Note from '#models/note'
 import Company from '#models/company'
 import { noteContentValidator } from '#validators/note/note_content'
+import Vote from '#models/vote'
 
 export default class PublicNotesController {
    /**
@@ -76,11 +77,17 @@ export default class PublicNotesController {
 
          // Paginate
          const notes = await query.paginate(page, perPage)
+
+         // load vote status
+         const noteIds = notes.all().map((note) => note.id) || []
+         const voteMap = await this.bulk(noteIds, currentUser!.id)
+
          const transformedNotes = notes.toJSON()
 
          return response.ok({
             notes: transformedNotes.data,
             meta: transformedNotes.meta,
+            votes: voteMap,
          })
       } catch (error) {
          if (error.name === 'ModelNotFoundException') {
@@ -151,6 +158,58 @@ export default class PublicNotesController {
             error: 'Server Error',
             message: 'Something went wrong while fetching the note',
          })
+      }
+   }
+
+   // Helper function
+   async bulk(noteIds: number[], userId: number) {
+      try {
+         // Fetch all votes for the user and these notes in a single query
+         const userVotes = await Vote.query()
+            .whereIn('note_id', noteIds)
+            .where('user_id', userId)
+            .select('note_id', 'vote_type')
+
+         // Fetch vote counts for all notes in a single query
+         const notes = await Note.query().whereIn('id', noteIds).select('id', 'vote_count')
+
+         // Transform to a map for easy lookup
+         const voteMap: Record<
+            number,
+            { hasVoted: boolean; voteType: 'up' | 'down' | null; voteCount: number }
+         > = {}
+
+         // Initialize all notes with vote counts from database
+         notes.forEach((note) => {
+            voteMap[note.id] = {
+               hasVoted: false,
+               voteType: null,
+               voteCount: note.voteCount,
+            }
+         })
+
+         // Update with actual user votes
+         userVotes.forEach((vote) => {
+            if (voteMap[vote.noteId]) {
+               voteMap[vote.noteId].hasVoted = true
+               voteMap[vote.noteId].voteType = vote.voteType
+            }
+         })
+
+         // For noteIds that don't exist in database, set default values
+         noteIds.forEach((noteId) => {
+            if (!voteMap[noteId]) {
+               voteMap[noteId] = {
+                  hasVoted: false,
+                  voteType: null,
+                  voteCount: 0,
+               }
+            }
+         })
+
+         return voteMap
+      } catch (error) {
+         throw new Error(error)
       }
    }
 }

@@ -5,11 +5,18 @@ import api from "../../api/axios";
 import type { Note, SortOption, PaginationMeta } from "../../types";
 import PublicNoteCard from "../../components/PublicNoteCard";
 import Pagination from "../../components/Pagination";
-import { useBulkVotes } from "../../hooks/useBulkVotes";
 
 interface PublicNotesResponse {
    notes: Note[];
    meta: PaginationMeta;
+   votes: Record<
+      number,
+      {
+         hasVoted: boolean;
+         voteType: "up" | "down" | null;
+         voteCount: number;
+      }
+   >;
 }
 
 export default function PublicNotesDirectory() {
@@ -22,9 +29,6 @@ export default function PublicNotesDirectory() {
    const [search, setSearch] = useState("");
    const [searchInput, setSearchInput] = useState("");
    const [sort, setSort] = useState<SortOption>("newest");
-
-   const noteIds = data?.notes.map((note) => note.id) || [];
-   const { votes, refetch: refetchVotes } = useBulkVotes(noteIds);
 
    useEffect(() => {
       fetchNotes(currentPage, search, sort);
@@ -241,11 +245,10 @@ export default function PublicNotesDirectory() {
                            key={note.id}
                            note={note}
                            workspaceName={note.workspace?.name}
-                           initialVoteStatus={votes[note.id] ?? null}
-                           onVoteChange={() => {
-                              refetchVotes();
-                              fetchNotes(currentPage, search, sort);
-                           }}
+                           initialVoteStatus={data.votes[note.id] ?? null}
+                           onVoteChange={() =>
+                              fetchNotes(currentPage, search, sort)
+                           }
                         />
                      ))}
                   </div>

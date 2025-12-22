@@ -1,25 +1,19 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
-import type { DashboardData, Note } from "../types/index";
+import type { DashboardData, Note, VoteMap } from "../types/index";
 import { useNavigate } from "react-router-dom";
 import PublicNoteCard from "../components/PublicNoteCard";
-import { useBulkVotes } from "../hooks/useBulkVotes";
 
 export default function Dashboard() {
    const { logout } = useAuth();
    const [dashboard, setDashboard] = useState<DashboardData | null>(null);
    const [publicNotes, setPublicNotes] = useState<Note[]>([]);
+   const [votes, setVotesStatus] = useState<VoteMap>();
    const [loading, setLoading] = useState(true);
    const [loadingPublicNotes, setLoadingPublicNotes] = useState(false);
    const [error, setError] = useState("");
    const navigate = useNavigate();
-
-   // Extract note IDs for bulk vote loading
-   const noteIds = publicNotes.map((note) => note.id);
-
-   // Use bulk vote loader
-   const { votes, refetch: refetchVotes } = useBulkVotes(noteIds);
 
    useEffect(() => {
       fetchDashboard();
@@ -45,6 +39,7 @@ export default function Dashboard() {
             params: { page: 1, perPage: 10, sort: "newest" },
          });
          setPublicNotes(data.notes);
+         setVotesStatus(data.votes);
       } catch (err) {
          console.error("Failed to load public notes preview", err);
       } finally {
@@ -61,8 +56,6 @@ export default function Dashboard() {
    };
 
    const handleVoteChange = () => {
-      // Refetch votes and notes after voting
-      refetchVotes();
       fetchPublicNotesPreview();
    };
 
@@ -86,7 +79,6 @@ export default function Dashboard() {
 
    return (
       <div className="min-h-screen bg-gray-50">
-         {/* Header */}
          <header className="bg-white shadow">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                <div className="flex items-center justify-between">
@@ -110,7 +102,6 @@ export default function Dashboard() {
 
          {/* Main Content */}
          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Quick Actions */}
             <div className="mb-8">
                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <button
@@ -172,7 +163,7 @@ export default function Dashboard() {
                            key={note.id}
                            note={note}
                            workspaceName={note.workspace?.name}
-                           initialVoteStatus={votes[note.id] ?? null}
+                           initialVoteStatus={votes![note.id] ?? null}
                            onVoteChange={handleVoteChange}
                         />
                      ))}
