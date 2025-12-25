@@ -11,9 +11,6 @@ export default class PublicNotesController {
     */
    async index({ request, response, currentUser }: HttpContext) {
       try {
-         // const hostname =
-         //    (request.hostname()?.includes('ezycomp') ? 'ezycomp' : request.hostname()) ||
-         //    'localhost'
          const hostname =
             (currentUser?.email?.includes('ezycomp') ? 'ezycomp' : request.hostname()) ||
             'localhost'
@@ -50,14 +47,12 @@ export default class PublicNotesController {
             })
             .preload('tags')
 
-         // Search by title
          if (search) {
             query.where((builder) => {
                builder.whereILike('title', `%${search}%`)
             })
          }
 
-         // Sorting
          switch (sort) {
             case 'newest':
                query.orderBy('created_at', 'desc')
@@ -75,7 +70,6 @@ export default class PublicNotesController {
                query.orderBy('created_at', 'desc')
          }
 
-         // Paginate
          const notes = await query.paginate(page, perPage)
 
          // load vote status
@@ -164,14 +158,15 @@ export default class PublicNotesController {
    // Helper function
    async bulk(noteIds: number[], userId: number) {
       try {
-         // Fetch all votes for the user and these notes in a single query
-         const userVotes = await Vote.query()
-            .whereIn('note_id', noteIds)
-            .where('user_id', userId)
-            .select('note_id', 'vote_type')
+         // Fetch user-specific votes and vote counts for all notes
+         const [userVotes, notes] = await Promise.all([
+            Vote.query()
+               .whereIn('note_id', noteIds)
+               .where('user_id', userId)
+               .select('note_id', 'vote_type'),
 
-         // Fetch vote counts for all notes in a single query
-         const notes = await Note.query().whereIn('id', noteIds).select('id', 'vote_count')
+            Note.query().whereIn('id', noteIds).select('id', 'vote_count'),
+         ])
 
          // Transform to a map for easy lookup
          const voteMap: Record<

@@ -8,10 +8,8 @@ const schema = vine.object({
    tags: vine.array(vine.string().minLength(1).maxLength(100)).optional(),
 })
 
-// Compile the validator first
 const validator = vine.compile(schema)
 
-// Assign the custom messages provider to the compiled validator
 validator.messagesProvider = new SimpleMessagesProvider({
    'page.min': 'Page number must be at least 1.',
    'perPage.min': 'Items per page must be at least 1.',

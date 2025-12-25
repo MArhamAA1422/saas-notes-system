@@ -147,11 +147,9 @@ export default class NotesController {
     */
    async getUserNotes({ params, response, currentUser, request }: HttpContext) {
       const { type } = params
-      const page = request.input('page', 1)
-      const perPage = request.input('perPage', 10)
-      const search = request.input('search', '')
 
-      // Validate type
+      const { page, perPage, search } = await request.validateUsing(noteContentValidator)
+
       if (!['draft', 'published'].includes(type)) {
          return response.badRequest({
             error: 'Bad Request',
@@ -161,7 +159,6 @@ export default class NotesController {
 
       const status = type === 'draft' ? 'draft' : 'published'
 
-      // Build query
       const query = Note.query()
          .where('user_id', currentUser!.id)
          .where('status', status)
@@ -183,13 +180,11 @@ export default class NotesController {
          )
          .orderBy('updated_at', 'desc')
 
-      // Search by title
       if (search) {
          query.whereILike('title', `%${search}%`)
       }
 
-      // Paginate
-      const notes = await query.paginate(page, perPage)
+      const notes = await query.paginate(page!, perPage)
 
       return response.ok({
          notes: notes.all(),
